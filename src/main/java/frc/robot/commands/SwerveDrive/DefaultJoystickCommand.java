@@ -39,6 +39,11 @@ public class DefaultJoystickCommand extends Command {
   }
 
   @Override
+  public void end(boolean interrupted) {
+    drive.drive(new ChassisSpeeds(), true);
+  }
+
+  @Override
   public boolean isFinished() {
     return false;
   }

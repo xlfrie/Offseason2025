@@ -36,8 +36,6 @@ public class SwerveDrive extends SubsystemBase {
 
   private StructPublisher<Pose2d> realPosePublisher;
 
-  //  TODO make sure disabling stops everything
-
   public SwerveDrive(GyroIO gyro, ModuleIO fl, ModuleIO fr, ModuleIO bl, ModuleIO br) {
     this.gyro = gyro;
 
