@@ -1,12 +1,18 @@
 package frc.robot.subsystems.SwerveDrive;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.networktables.*;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -16,6 +22,9 @@ import frc.robot.RobotContainer;
 import frc.robot.subsystems.hardware.gyroscope.GyroIO;
 import frc.robot.subsystems.hardware.module.ModuleIO;
 import org.dyn4j.geometry.Vector2;
+import org.json.simple.parser.ParseException;
+
+import java.io.IOException;
 
 import static edu.wpi.first.units.Units.Radians;
 
@@ -54,18 +63,35 @@ public class SwerveDrive extends SubsystemBase {
           NetworkTableInstance.getDefault().getStructTopic("Real Pose", Pose2d.struct).publish();
     }
 
+    RobotConfig ppConfig = null;
+    try {
+      ppConfig = RobotConfig.fromGUISettings();
+    } catch (IOException | ParseException e) {
+      e.printStackTrace();
+    }
+
+    if (ppConfig != null) {
+//      TODO move pid constants to constants file (pls help i dont wanna do this)
+      AutoBuilder.configure(this::getPose, this::setPose, this::getChassisSpeed,
+//          TODO figure out why the speeds need to be flipped (maybe because it expects blue alliance?)
+          (ChassisSpeeds speeds) -> this.drive(speeds.times(-1), false),
+          new PPHolonomicDriveController(new PIDConstants(10, 2, 0), new PIDConstants(4, 8, 0.3)),
+          ppConfig,
+          //          TODO figure out why documentation recommends flipping based on alliance
+          () -> false);
+    }
+
     initTelemetry();
   }
 
   public void drive(ChassisSpeeds chassisSpeeds, boolean absolute) {
     //    TODO make use swerve kinematics class
-    if (absolute) {
-      double heading = getHeading().getRadians();
-      calculateState(chassisSpeeds, heading, frontRight);
-      calculateState(chassisSpeeds, heading, frontLeft);
-      calculateState(chassisSpeeds, heading, backRight);
-      calculateState(chassisSpeeds, heading, backLeft);
-    }
+    double heading = getHeading().getRadians();
+    calculateState(chassisSpeeds, heading, frontRight, absolute);
+    calculateState(chassisSpeeds, heading, frontLeft, absolute);
+    calculateState(chassisSpeeds, heading, backRight, absolute);
+    calculateState(chassisSpeeds, heading, backLeft, absolute);
+
   }
 
   @Override
@@ -90,10 +116,12 @@ public class SwerveDrive extends SubsystemBase {
     }
   }
 
-  private void calculateState(ChassisSpeeds chassisSpeeds, double heading, ModuleIO module) {
+  private void calculateState(ChassisSpeeds chassisSpeeds, double heading, ModuleIO module,
+      boolean absolute) {
     Vector2 translationVector =
-        new Vector2(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond).rotate(
-            -heading);
+        new Vector2(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond);
+    if (absolute)
+      translationVector.rotate(-heading);
     Vector2 rotationVector =
         module.getNormalRotationVec().copy().multiply(chassisSpeeds.omegaRadiansPerSecond);
 
@@ -117,7 +145,9 @@ public class SwerveDrive extends SubsystemBase {
         translationVector.getMagnitude() == 0 ? null : new Rotation2d(vecAngle));
   }
 
-
+  public ChassisSpeeds getChassisSpeed() {
+    return RobotContainer.swerveDriveKinematics.toChassisSpeeds(getModuleStates());
+  }
 
   public Pose2d getPose() {
     return swerveDrivePoseEstimator.getEstimatedPosition();

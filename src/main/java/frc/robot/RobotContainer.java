@@ -4,9 +4,11 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.Units;
@@ -56,7 +58,7 @@ public class RobotContainer {
               .withRobotMass(Units.Pound.of(78)).withSwerveModule(
                   COTS.ofMark4i(DCMotor.getFalcon500(1), DCMotor.getNEO(1), COTS.WHEELS.COLSONS.cof, 3))
               .withTrackLengthTrackWidth(Inches.of(24), Inches.of(24)),
-          new Pose2d(1, 1, Rotation2d.kZero));
+          new Pose2d(2, 7, Rotation2d.kZero));
 
 
       m_swerveDrive = new SwerveDrive(new GyroIOSim(swerveDriveSimulation.getGyroSimulation()),
@@ -86,8 +88,23 @@ public class RobotContainer {
    */
 
   private void configureBindings() {
+  }
+
+  public void bindJoystickCommand() {
     m_swerveDrive.setDefaultCommand(
         new DefaultJoystickCommand(controller::getLeftX, controller::getLeftY,
             controller::getRightX, m_swerveDrive));
+  }
+
+  public void unbindJoystick() {
+    m_swerveDrive.removeDefaultCommand();
+  }
+
+  public PathPlannerAuto getAutonomousCommand() {
+    return new PathPlannerAuto("New Auto");
+  }
+
+  public void clearModuleStates() {
+    m_swerveDrive.drive(new ChassisSpeeds(), true);
   }
 }
