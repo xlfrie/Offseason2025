@@ -146,7 +146,10 @@ public class SwerveDrive extends SubsystemBase {
   }
 
   public ChassisSpeeds getChassisSpeed() {
-    return RobotContainer.swerveDriveKinematics.toChassisSpeeds(getModuleStates());
+    ChassisSpeeds chassisSpeeds =
+        RobotContainer.swerveDriveKinematics.toChassisSpeeds(getModuleStates());
+    chassisSpeeds.omegaRadiansPerSecond = gyro.getAngularVelocity().in(RadiansPerSecond);
+    return chassisSpeeds;
   }
 
   public Pose2d getPose() {
