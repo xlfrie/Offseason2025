@@ -27,19 +27,20 @@ import org.json.simple.parser.ParseException;
 import java.io.IOException;
 
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 
 public class SwerveDrive extends SubsystemBase {
-  private GyroIO gyro;
-  private SwerveDrivePoseEstimator swerveDrivePoseEstimator;
+  private final GyroIO gyro;
+  private final SwerveDrivePoseEstimator swerveDrivePoseEstimator;
 
-  private ModuleIO frontLeft;
-  private ModuleIO frontRight;
-  private ModuleIO backLeft;
-  private ModuleIO backRight;
+  private final ModuleIO frontLeft;
+  private final ModuleIO frontRight;
+  private final ModuleIO backLeft;
+  private final ModuleIO backRight;
 
-  private StructPublisher<Pose2d> posePublisher =
+  private final StructPublisher<Pose2d> posePublisher =
       NetworkTableInstance.getDefault().getStructTopic("Pose", Pose2d.struct).publish();
-  private StructArrayPublisher<SwerveModuleState> currentModuleStatesPublisher =
+  private final StructArrayPublisher<SwerveModuleState> currentModuleStatesPublisher =
       NetworkTableInstance.getDefault()
           .getStructArrayTopic("Current Module States", SwerveModuleState.struct).publish();
 
@@ -71,9 +72,9 @@ public class SwerveDrive extends SubsystemBase {
     }
 
     if (ppConfig != null) {
-//      TODO move pid constants to constants file (pls help i dont wanna do this)
+      //      TODO move pid constants to constants file (pls help i dont wanna do this)
       AutoBuilder.configure(this::getPose, this::setPose, this::getChassisSpeed,
-//          TODO figure out why the speeds need to be flipped (maybe because it expects blue alliance?)
+          //          TODO figure out why the speeds need to be flipped (maybe because it expects blue alliance?)
           (ChassisSpeeds speeds) -> this.drive(speeds.times(-1), false),
           new PPHolonomicDriveController(new PIDConstants(10, 2, 0), new PIDConstants(4, 8, 0.3)),
           ppConfig,
@@ -156,9 +157,8 @@ public class SwerveDrive extends SubsystemBase {
     return swerveDrivePoseEstimator.getEstimatedPosition();
   }
 
-  public Pose2d setPose(Pose2d pose) {
+  public void setPose(Pose2d pose) {
     swerveDrivePoseEstimator.resetPosition(gyro.getRotation(), getModulePositions(), pose);
-    return null;
   }
 
   public SwerveModulePosition[] getModulePositions() {

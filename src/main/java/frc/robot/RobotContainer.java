@@ -27,6 +27,8 @@ import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
+import static frc.robot.Constants.PhysicalRobotConstants.kDriveBaseLength;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -40,13 +42,13 @@ public class RobotContainer {
 
   public static SwerveDriveSimulation swerveDriveSimulation;
 
-  private static final double k_driveBaseLength = 0.6096;
+  private static final double k_driveBaseLengthMeters = kDriveBaseLength.in(Meters);
 
-  public static final SwerveDriveKinematics swerveDriveKinematics =
-      new SwerveDriveKinematics(new Translation2d(-k_driveBaseLength / 2, -k_driveBaseLength / 2),
-          new Translation2d(-k_driveBaseLength / 2, k_driveBaseLength / 2),
-          new Translation2d(k_driveBaseLength / 2, -k_driveBaseLength / 2),
-          new Translation2d(k_driveBaseLength / 2, k_driveBaseLength / 2));
+  public static final SwerveDriveKinematics swerveDriveKinematics = new SwerveDriveKinematics(
+      new Translation2d(-k_driveBaseLengthMeters / 2, -k_driveBaseLengthMeters / 2),
+      new Translation2d(-k_driveBaseLengthMeters / 2, k_driveBaseLengthMeters / 2),
+      new Translation2d(k_driveBaseLengthMeters / 2, -k_driveBaseLengthMeters / 2),
+      new Translation2d(k_driveBaseLengthMeters / 2, k_driveBaseLengthMeters / 2));
 
   public RobotContainer() {
     if (Robot.isReal()) {
@@ -60,19 +62,19 @@ public class RobotContainer {
               .withTrackLengthTrackWidth(Inches.of(24), Inches.of(24)),
           new Pose2d(2, 7, Rotation2d.kZero));
 
-
+      //TODO change this to not assume square drivebase
       m_swerveDrive = new SwerveDrive(new GyroIOSim(swerveDriveSimulation.getGyroSimulation()),
           new ModuleIOSim(swerveDriveSimulation.getModules()[0], "Front Left",
-              new Vector2(-k_driveBaseLength / 2, k_driveBaseLength / 2)),
+              new Vector2(-k_driveBaseLengthMeters / 2, k_driveBaseLengthMeters / 2)),
           new ModuleIOSim(swerveDriveSimulation.getModules()[1], "Front Right",
-              new Vector2(k_driveBaseLength / 2, k_driveBaseLength / 2)),
+              new Vector2(k_driveBaseLengthMeters / 2, k_driveBaseLengthMeters / 2)),
           new ModuleIOSim(swerveDriveSimulation.getModules()[2], "Back Left",
-              new Vector2(-k_driveBaseLength / 2, -k_driveBaseLength / 2)),
+              new Vector2(-k_driveBaseLengthMeters / 2, -k_driveBaseLengthMeters / 2)),
           new ModuleIOSim(swerveDriveSimulation.getModules()[3], "Back Right",
-              new Vector2(k_driveBaseLength / 2, -k_driveBaseLength / 2)));
+              new Vector2(k_driveBaseLengthMeters / 2, -k_driveBaseLengthMeters / 2)));
 
       SimulatedArena.getInstance().addDriveTrainSimulation(swerveDriveSimulation);
-      controller = new DualShock4Controller(0);
+      controller = new DualShock4Controller(Constants.OperatorConstants.kDriverControllerPort);
     }
     configureBindings();
   }

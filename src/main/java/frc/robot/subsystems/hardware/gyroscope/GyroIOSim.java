@@ -5,7 +5,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import org.ironmaple.simulation.drivesims.GyroSimulation;
 
 public class GyroIOSim implements GyroIO {
-  private GyroSimulation gyroSimulation;
+  private final GyroSimulation gyroSimulation;
 
   public GyroIOSim(GyroSimulation gyroSimulation) {
     this.gyroSimulation = gyroSimulation;

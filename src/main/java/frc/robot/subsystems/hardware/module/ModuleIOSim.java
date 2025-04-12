@@ -6,42 +6,32 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.Constants;
 import org.dyn4j.geometry.Vector2;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.motorsims.SimulatedMotorController;
 
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.Constants.PhysicalRobotConstants.k_wheelCircumference;
 
 public class ModuleIOSim implements ModuleIO {
-  private SwerveModuleSimulation swerveModuleSimulation;
-  private SimulatedMotorController.GenericMotorController driveMotor;
-  private SimulatedMotorController.GenericMotorController steerMotor;
-  private SwerveModulePosition swerveModulePosition;
+  private final SwerveModuleSimulation swerveModuleSimulation;
+  private final SimulatedMotorController.GenericMotorController driveMotor;
+  private final SimulatedMotorController.GenericMotorController steerMotor;
+  private final SwerveModulePosition swerveModulePosition;
 
   private double k_gearRatio = 1;
 
-  public static final Distance k_wheelRadius = Meters.ofBaseUnits(Inches.of(2).baseUnitMagnitude());
-  public static final Distance k_wheelCircumference = k_wheelRadius.times(2 * Math.PI);
-
-  private PIDController drivePID;
-  private PIDController steerPID;
-
-  private SwerveModuleState desiredState;
 
   //  TODO remove drive pid? idk if it's worth
+  private final PIDController drivePID;
+  private final PIDController steerPID;
 
-  private final double kPDrive = 0.1;
-  private final double kIDrive = 0;
-  private final double kDDrive = 0;
+  private final SwerveModuleState desiredState;
 
-  private final double kPSteer = 20;
-  private final double kISteer = 30;
-  private final double kDSteer = 1;
-
-  private String moduleName;
-  private Vector2 normalRotationVector;
+  private final String moduleName;
+  private final Vector2 normalRotationVector;
 
   public ModuleIOSim(SwerveModuleSimulation swerveModuleSimulation, String moduleName,
       Vector2 physicalPosition) {
@@ -54,8 +44,12 @@ public class ModuleIOSim implements ModuleIO {
     this.steerMotor =
         swerveModuleSimulation.useGenericControllerForSteer().withCurrentLimit(Units.Amps.of(20));
 
-    this.drivePID = new PIDController(kPDrive, kIDrive, kDDrive);
-    this.steerPID = new PIDController(kPSteer, kISteer, kDSteer);
+    this.drivePID = new PIDController(Constants.SimulatedControlSystemConstants.kPDrive,
+        Constants.SimulatedControlSystemConstants.kIDrive,
+        Constants.SimulatedControlSystemConstants.kDDrive);
+    this.steerPID = new PIDController(Constants.SimulatedControlSystemConstants.kPSteer,
+        Constants.SimulatedControlSystemConstants.kISteer,
+        Constants.SimulatedControlSystemConstants.kDSteer);
     steerPID.enableContinuousInput(-Math.PI, Math.PI);
 
     this.moduleName = moduleName;
