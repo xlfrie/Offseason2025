@@ -2,11 +2,14 @@ package frc.robot.utilities.controller;
 
 import edu.wpi.first.wpilibj.Joystick;
 
-public class SimulatedController implements Controller{
-  private Joystick leftJoystick;
-  private Joystick rightJoystick;
+public class SimulatedController implements Controller {
+  private final Joystick leftJoystick;
+  private final Joystick rightJoystick;
 
 
+  /**
+   * Instantiate a keyboard based controller for simulation.
+   */
   public SimulatedController() {
     leftJoystick = new Joystick(0);
     rightJoystick = new Joystick(1);

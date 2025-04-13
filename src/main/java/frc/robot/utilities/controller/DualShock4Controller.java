@@ -2,8 +2,8 @@ package frc.robot.utilities.controller;
 
 import edu.wpi.first.wpilibj.PS4Controller;
 
-public class DualShock4Controller implements Controller{
-  private PS4Controller ps4Controller;
+public class DualShock4Controller implements Controller {
+  private final PS4Controller ps4Controller;
 
   public DualShock4Controller(int port) {
     ps4Controller = new PS4Controller(port);

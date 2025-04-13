@@ -50,11 +50,17 @@ public class RobotContainer {
       new Translation2d(k_driveBaseLengthMeters / 2, -k_driveBaseLengthMeters / 2),
       new Translation2d(k_driveBaseLengthMeters / 2, k_driveBaseLengthMeters / 2));
 
+  /**
+   * Registers all important robot code, e.g. swerve, path planner, controls
+   */
   public RobotContainer() {
     if (Robot.isReal()) {
+      // Real drive train
 
     } else {
-      //      TODO add constant for drive base length
+      // Simulation drive train
+
+      // TODO add constant for drive base length
       swerveDriveSimulation = new SwerveDriveSimulation(
           DriveTrainSimulationConfig.Default().withGyro(COTS.ofPigeon2())
               .withRobotMass(Units.Pound.of(78)).withSwerveModule(
@@ -62,7 +68,7 @@ public class RobotContainer {
               .withTrackLengthTrackWidth(Inches.of(24), Inches.of(24)),
           new Pose2d(2, 7, Rotation2d.kZero));
 
-      //TODO change this to not assume square drivebase
+      // TODO change this to not assume square drivebase
       m_swerveDrive = new SwerveDrive(new GyroIOSim(swerveDriveSimulation.getGyroSimulation()),
           new ModuleIOSim(swerveDriveSimulation.getModules()[0], "Front Left",
               new Vector2(-k_driveBaseLengthMeters / 2, k_driveBaseLengthMeters / 2)),
@@ -92,20 +98,32 @@ public class RobotContainer {
   private void configureBindings() {
   }
 
+  /**
+   * Sets the controller as the default movement command for swerve.
+   */
   public void bindJoystickCommand() {
     m_swerveDrive.setDefaultCommand(
         new DefaultJoystickCommand(controller::getLeftX, controller::getLeftY,
             controller::getRightX, m_swerveDrive));
   }
 
+  /**
+   * Removes the controller from being used for movement.
+   */
   public void unbindJoystick() {
     m_swerveDrive.removeDefaultCommand();
   }
 
+  /**
+   * Gets path planner auto to be run during autonomous.
+   */
   public PathPlannerAuto getAutonomousCommand() {
     return new PathPlannerAuto("New Auto");
   }
 
+  /**
+   * Stops the robot's movement.
+   */
   public void clearModuleStates() {
     m_swerveDrive.drive(new ChassisSpeeds(), true);
   }

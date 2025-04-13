@@ -10,36 +10,96 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.dyn4j.geometry.Vector2;
 
 public interface ModuleIO {
+  /**
+   * Set voltage supplied to drive motor
+   *
+   * @param voltage Voltage to be supplied to drive motor
+   */
   void setDriveVoltage(Voltage voltage);
 
+
+  /**
+   * Set voltage supplied to steer motor
+   *
+   * @param voltage Voltage to be supplied to steer motor
+   */
   void setSteerVoltage(Voltage voltage);
 
+  /**
+   * @return Voltage that is applied to the drive motor
+   */
   Voltage getDriveVoltage();
 
+  /**
+   * @return Voltage that is applied to the steer motor
+   */
   Voltage getSteerVoltage();
 
+  /**
+   * @return The direction the wheel is facing
+   */
   Rotation2d getSteerAngle();
 
+  /**
+   * @return The rotation of the wheel (this can be greater than one rotation)
+   */
   Angle getDriveWheelPosition();
 
+  /**
+   * @return This module's {@link SwerveModuleState}
+   */
   SwerveModuleState getState();
 
+  /**
+   * @return This module's {@link SwerveModulePosition}
+   */
   SwerveModulePosition getPosition();
 
+
+  /**
+   * @param angle The new setpoint for the steer PID
+   */
   void setSteerPID(double angle);
 
+  /**
+   * This PID is not currently used
+   *
+   * @param speed The new setpoint for the drive PID
+   */
   void setDrivePID(double speed);
 
+
+  /**
+   * @param speed The desired state for the wheel's speed
+   * @param angle The desired angle for the wheel to face
+   */
   void setDesiredState(double speed, Rotation2d angle);
 
+  /**
+   * @return The module's desired states
+   */
   SwerveModuleState getDesiredState();
 
+  /**
+   * This function is needed if the PID is implemented in software. This should be used to set motor
+   * outputs from the PID.
+   */
   void tickPID();
 
+  /**
+   * @return Module's name
+   */
   String getModuleName();
 
+  /**
+   * @return Normalized vector that when set as the desired state for this module will rotate the
+   * robot without translation
+   */
   Vector2 getNormalRotationVec();
 
+  /**
+   * Publishes telemetry for this module into the SmartDashboard
+   */
   default void telemetry() {
     SmartDashboard.putData(getModuleName(), sendableBuilder -> {
       sendableBuilder.setSmartDashboardType(getModuleName());

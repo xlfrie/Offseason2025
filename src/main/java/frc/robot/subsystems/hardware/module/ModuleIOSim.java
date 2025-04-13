@@ -21,6 +21,7 @@ public class ModuleIOSim implements ModuleIO {
   private final SimulatedMotorController.GenericMotorController steerMotor;
   private final SwerveModulePosition swerveModulePosition;
 
+  //  TODO move into Constants.java
   private double k_gearRatio = 1;
 
 
@@ -87,7 +88,6 @@ public class ModuleIOSim implements ModuleIO {
     return swerveModuleSimulation.getSteerAbsoluteFacing();
   }
 
-  //  TODO ensure this value is not limited
   @Override
   public Angle getDriveWheelPosition() {
     return swerveModuleSimulation.getDriveWheelFinalPosition();
@@ -98,7 +98,6 @@ public class ModuleIOSim implements ModuleIO {
     return swerveModuleSimulation.getCurrentState();
   }
 
-  //  TODO if swerveposeestimator is off it may be because of this
   @Override
   public SwerveModulePosition getPosition() {
     swerveModulePosition.angle = this.getSteerAngle();

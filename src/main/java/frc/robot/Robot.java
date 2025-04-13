@@ -9,11 +9,6 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.ironmaple.simulation.SimulatedArena;
 
-/**
- * The methods in this class are called automatically corresponding to each mode, as described in
- * the TimedRobot documentation. If you change the name of this class or the package after creating
- * this project, you must also update the Main.java file in the project.
- */
 public class Robot extends TimedRobot {
   private final RobotContainer m_robotContainer;
   private PathPlannerAuto autonomousCommand;
@@ -23,9 +18,7 @@ public class Robot extends TimedRobot {
    * initialization code.
    */
   public Robot() {
-    // Instantiate our RobotContainer. This will perform all our button bindings,
-    // and put our
-    // autonomous chooser on the dashboard.
+    // Instantiate all of useful robot code
     m_robotContainer = new RobotContainer();
   }
 
@@ -39,14 +32,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
-    // Runs the Scheduler. This is responsible for polling buttons, adding
-    // newly-scheduled
-    // commands, running already-scheduled commands, removing finished or
-    // interrupted commands,
-    // and running subsystem periodic() methods. This must be called from the
-    // robot's periodic
-    // block in order for anything in the Command-based framework to work.
-
+    // Do not remove, ticks commands
     CommandScheduler.getInstance().run();
   }
 
@@ -61,12 +47,16 @@ public class Robot extends TimedRobot {
   }
 
   /**
-   * This autonomous runs the autonomous command selected by your {@link RobotContainer} class.
+   * Runs at beginning of autonomous.
+   * <p>
+   * Schedules autonomous command
    */
   @Override
   public void autonomousInit() {
     autonomousCommand = m_robotContainer.getAutonomousCommand();
 
+    // Ensures that operator cannot move robot during autonomous
+    // WARN do not remove, will break path planner
     m_robotContainer.unbindJoystick();
 
     if (autonomousCommand != null)
@@ -78,13 +68,10 @@ public class Robot extends TimedRobot {
   public void autonomousPeriodic() {
   }
 
+  /** Called at beginning of teleop */
   @Override
   public void teleopInit() {
-    // This makes sure that the autonomous stops running when
-    // teleop starts running. If you want the autonomous to
-    // continue until interrupted by another command, remove
-    // this line or comment it out.
-
+    // Make sure that our movement command is registered
     m_robotContainer.bindJoystickCommand();
 
     if (autonomousCommand != null) {
