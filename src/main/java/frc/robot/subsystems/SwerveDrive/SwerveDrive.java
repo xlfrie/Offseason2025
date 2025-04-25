@@ -120,13 +120,13 @@ public class SwerveDrive extends SubsystemBase {
   private void calculateState(ChassisSpeeds chassisSpeeds, double heading, ModuleIO module,
       boolean absolute) {
     Vector2 translationVector =
-        new Vector2(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond);
+        new Vector2(-chassisSpeeds.vyMetersPerSecond, chassisSpeeds.vxMetersPerSecond);
     if (absolute)
       translationVector.rotate(-heading);
     Vector2 rotationVector =
         module.getNormalRotationVec().copy().multiply(chassisSpeeds.omegaRadiansPerSecond);
 
-    translationVector.add(rotationVector).multiply(-1);
+    translationVector.add(rotationVector).rotate(Math.PI / 2);
 
     Angle vecAngle = Radians.of(translationVector.getDirection());
     double vecMagnitude = translationVector.getMagnitude();

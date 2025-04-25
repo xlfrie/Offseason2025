@@ -26,7 +26,6 @@ import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 
-import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static frc.robot.Constants.PhysicalRobotConstants.kDriveBaseLength;
 
@@ -65,7 +64,7 @@ public class RobotContainer {
           DriveTrainSimulationConfig.Default().withGyro(COTS.ofPigeon2())
               .withRobotMass(Units.Pound.of(78)).withSwerveModule(
                   COTS.ofMark4i(DCMotor.getFalcon500(1), DCMotor.getNEO(1), COTS.WHEELS.COLSONS.cof, 3))
-              .withTrackLengthTrackWidth(Inches.of(24), Inches.of(24)),
+              .withTrackLengthTrackWidth(kDriveBaseLength, kDriveBaseLength),
           new Pose2d(2, 7, Rotation2d.kZero));
 
       // TODO change this to not assume square drivebase

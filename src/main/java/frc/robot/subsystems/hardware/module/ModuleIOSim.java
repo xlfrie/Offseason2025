@@ -54,7 +54,7 @@ public class ModuleIOSim implements ModuleIO {
     steerPID.enableContinuousInput(-Math.PI, Math.PI);
 
     this.moduleName = moduleName;
-    this.normalRotationVector = physicalPosition.rotate(0).getNormalized();
+    this.normalRotationVector = physicalPosition.rotate(Math.PI / 2).getNormalized();
 
     this.desiredState = new SwerveModuleState(0, new Rotation2d());
 
