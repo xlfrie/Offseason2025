@@ -58,7 +58,6 @@ public class SwerveDrive extends SubsystemBase {
     this.backLeft = bl;
     this.backRight = br;
 
-    //    TODO ensure pose2d doesn't need to be mutable
     this.swerveDrivePoseEstimator =
         new SwerveDrivePoseEstimator(RobotContainer.swerveDriveKinematics, this.gyro.getRotation(),
             getModulePositions(), Pose2d.kZero);
@@ -68,33 +67,31 @@ public class SwerveDrive extends SubsystemBase {
           NetworkTableInstance.getDefault().getStructTopic("Real Pose", Pose2d.struct).publish();
     }
 
-    RobotConfig ppConfig = null;
+    RobotConfig ppConfig;
     try {
       ppConfig = RobotConfig.fromGUISettings();
     } catch (IOException | ParseException e) {
-      e.printStackTrace();
+      throw new RuntimeException("Failed to get PathPlanner config from GUI");
     }
 
-    if (ppConfig != null) {
-      //      TODO move pid constants to constants file (pls help i dont wanna do this)
-      AutoBuilder.configure(this::getPose, this::setPose, this::getChassisSpeed,
-          (ChassisSpeeds speeds) -> this.drive(speeds, false),
-          new PPHolonomicDriveController(new PIDConstants(10, 2, 0), new PIDConstants(4, 8, 0.3)),
-          ppConfig,
-          () -> {
-            Optional<DriverStation.Alliance> allianceOptional = DriverStation.getAlliance();
+    //      TODO move pid constants to constants file (pls help i dont wanna do this)
+    AutoBuilder.configure(this::getPose, this::setPose, this::getChassisSpeed,
+        (ChassisSpeeds speeds) -> this.drive(speeds, false),
+        new PPHolonomicDriveController(new PIDConstants(10, 2, 0), new PIDConstants(4, 8, 0.3)),
+        ppConfig,
+        () -> {
+          Optional<DriverStation.Alliance> allianceOptional = DriverStation.getAlliance();
 
-            if (allianceOptional.isPresent() && allianceOptional.get()
-                .equals(DriverStation.Alliance.Red)) {
-              headingOffset = Math.PI;
-              return true;
-            }
+          if (allianceOptional.isPresent() && allianceOptional.get()
+              .equals(DriverStation.Alliance.Red)) {
+            headingOffset = Math.PI;
+            return true;
+          }
 
-            headingOffset = 0;
+          headingOffset = 0;
 
-            return false;
-          });
-    }
+          return false;
+        });
 
     initTelemetry();
   }
