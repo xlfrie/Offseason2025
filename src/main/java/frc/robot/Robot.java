@@ -7,6 +7,7 @@ package frc.robot;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.hardware.vision.VisionIOSim;
 import org.ironmaple.simulation.SimulatedArena;
 
 public class Robot extends TimedRobot {
@@ -103,6 +104,9 @@ public class Robot extends TimedRobot {
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {
+      ((VisionIOSim) RobotContainer.visionIO).tick();
+
+
     SimulatedArena.getInstance().simulationPeriodic();
   }
 }

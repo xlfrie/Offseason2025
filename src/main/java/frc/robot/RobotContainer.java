@@ -18,6 +18,8 @@ import frc.robot.commands.SwerveDrive.DefaultJoystickCommand;
 import frc.robot.subsystems.SwerveDrive.SwerveDrive;
 import frc.robot.subsystems.hardware.gyroscope.GyroIOSim;
 import frc.robot.subsystems.hardware.module.ModuleIOSim;
+import frc.robot.subsystems.hardware.vision.VisionIO;
+import frc.robot.subsystems.hardware.vision.VisionIOSim;
 import frc.robot.utilities.controller.Controller;
 import frc.robot.utilities.controller.DualShock4Controller;
 import org.dyn4j.geometry.Vector2;
@@ -41,6 +43,8 @@ public class RobotContainer {
 
   public static SwerveDriveSimulation swerveDriveSimulation;
 
+  public static VisionIO visionIO;
+
   private static final double k_driveBaseLengthMeters = kDriveBaseLength.in(Meters);
 
   public static final SwerveDriveKinematics swerveDriveKinematics = new SwerveDriveKinematics(
@@ -57,6 +61,8 @@ public class RobotContainer {
       // Real drive train
 
     } else {
+      visionIO = new VisionIOSim();
+
       // Simulation drive train
 
       // TODO add constant for drive base length
