@@ -14,6 +14,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.MathUtils;
@@ -25,6 +26,7 @@ import org.dyn4j.geometry.Vector2;
 import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
@@ -37,6 +39,8 @@ public class SwerveDrive extends SubsystemBase {
   private final ModuleIO frontRight;
   private final ModuleIO backLeft;
   private final ModuleIO backRight;
+
+  private double headingOffset;
 
   private final StructPublisher<Pose2d> posePublisher =
       NetworkTableInstance.getDefault().getStructTopic("Pose", Pose2d.struct).publish();
@@ -78,8 +82,19 @@ public class SwerveDrive extends SubsystemBase {
           (ChassisSpeeds speeds) -> this.drive(speeds.times(-1), false),
           new PPHolonomicDriveController(new PIDConstants(10, 2, 0), new PIDConstants(4, 8, 0.3)),
           ppConfig,
-          //          TODO figure out why documentation recommends flipping based on alliance
-          () -> false);
+          () -> {
+            Optional<DriverStation.Alliance> allianceOptional = DriverStation.getAlliance();
+
+            if (allianceOptional.isPresent() && allianceOptional.get()
+                .equals(DriverStation.Alliance.Red)) {
+              headingOffset = Math.PI;
+              return true;
+            }
+
+            headingOffset = 0;
+
+            return false;
+          });
     }
 
     initTelemetry();
@@ -87,7 +102,7 @@ public class SwerveDrive extends SubsystemBase {
 
   public void drive(ChassisSpeeds chassisSpeeds, boolean absolute) {
     //    TODO make use swerve kinematics class
-    double heading = getHeading().getRadians();
+    double heading = getHeading().getRadians() + headingOffset;
     calculateState(chassisSpeeds, heading, frontRight, absolute);
     calculateState(chassisSpeeds, heading, frontLeft, absolute);
     calculateState(chassisSpeeds, heading, backRight, absolute);
@@ -158,6 +173,9 @@ public class SwerveDrive extends SubsystemBase {
   }
 
   public void setPose(Pose2d pose) {
+    if (Robot.isSimulation()) {
+      RobotContainer.swerveDriveSimulation.setSimulationWorldPose(pose);
+    }
     swerveDrivePoseEstimator.resetPosition(gyro.getRotation(), getModulePositions(), pose);
   }
 
