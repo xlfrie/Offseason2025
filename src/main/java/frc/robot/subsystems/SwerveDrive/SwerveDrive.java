@@ -78,7 +78,6 @@ public class SwerveDrive extends SubsystemBase {
     if (ppConfig != null) {
       //      TODO move pid constants to constants file (pls help i dont wanna do this)
       AutoBuilder.configure(this::getPose, this::setPose, this::getChassisSpeed,
-          //          TODO figure out why the speeds need to be flipped (maybe because it expects blue alliance?)
           (ChassisSpeeds speeds) -> this.drive(speeds, false),
           new PPHolonomicDriveController(new PIDConstants(10, 2, 0), new PIDConstants(4, 8, 0.3)),
           ppConfig,
