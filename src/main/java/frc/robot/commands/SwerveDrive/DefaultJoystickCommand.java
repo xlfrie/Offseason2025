@@ -47,7 +47,7 @@ public class DefaultJoystickCommand extends Command {
   @Override
   public void execute() {
     ChassisSpeeds chassisSpeeds =
-        new ChassisSpeeds(applyDeadband(ly.getAsDouble()), applyDeadband(lx.getAsDouble()),
+        new ChassisSpeeds(applyDeadband(-ly.getAsDouble()), applyDeadband(-lx.getAsDouble()),
             applyDeadband(rx.getAsDouble()));
 
     drive.drive(chassisSpeeds, true);
