@@ -18,7 +18,7 @@ import static edu.wpi.first.units.Units.*;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-  //  TODO populate this class
+  // TODO populate this class
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
 

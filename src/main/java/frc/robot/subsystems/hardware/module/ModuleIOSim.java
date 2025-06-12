@@ -21,11 +21,11 @@ public class ModuleIOSim implements ModuleIO {
   private final SimulatedMotorController.GenericMotorController steerMotor;
   private final SwerveModulePosition swerveModulePosition;
 
-  //  TODO move into Constants.java
+  // TODO move into Constants.java
   private double k_gearRatio = 1;
 
 
-  //  TODO remove drive pid? idk if it's worth
+  // TODO remove drive pid? idk if it's worth
   private final PIDController drivePID;
   private final PIDController steerPID;
 
@@ -72,7 +72,7 @@ public class ModuleIOSim implements ModuleIO {
     this.steerMotor.requestVoltage(voltage);
   }
 
-  //  TODO clamp any voltages sent to motors
+  // TODO clamp any voltages sent to motors
   @Override
   public Voltage getDriveVoltage() {
     return this.driveMotor.getAppliedVoltage();

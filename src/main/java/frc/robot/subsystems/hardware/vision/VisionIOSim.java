@@ -28,7 +28,7 @@ public class VisionIOSim implements VisionIO {
   public VisionIOSim() {
     SimCameraProperties cameraProps = new SimCameraProperties();
 
-    //    Diagonal FOV was calculated from horizontal and vertical FOV given from https://docs.limelightvision.io/docs/docs-limelight/getting-started/limelight-3#hardware-specifications
+    // Diagonal FOV was calculated from horizontal and vertical FOV given from https://docs.limelightvision.io/docs/docs-limelight/getting-started/limelight-3#hardware-specifications
     cameraProps.setCalibration(640, 480, Rotation2d.fromDegrees(74.34285844));
     cameraProps.setCalibError(0.25, 0.08);
     cameraProps.setFPS(50);
