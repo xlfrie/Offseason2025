@@ -1,8 +1,10 @@
 package frc.robot.subsystems.hardware.module;
 
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.spark.SparkMax;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -18,6 +20,9 @@ public class ModuleIOReal implements ModuleIO {
   private final TalonFX driveMotorController;
   private final SparkMax steerMotorController;
   private final CANcoder CANCoder;
+
+  // TODO this might be better of as a profiled PID controller
+  private final PIDController steerPIDController;
 
   private final int driveMotorID;
   private final int steerMotorID;
@@ -51,6 +56,11 @@ public class ModuleIOReal implements ModuleIO {
     driveMotorController = new TalonFX(this.driveMotorID, "rio");
     steerMotorController = new SparkMax(this.steerMotorID, SparkMax.MotorType.kBrushless);
 
+    steerPIDController = new PIDController(0.0075, 0, 0);
+
+    steerPIDController.enableContinuousInput(-Math.PI, Math.PI);
+    steerPIDController.setTolerance(0.05);
+
     CANCoder = new CANcoder(this.CANCoderID, "rio");
 
     // TODO more config, pid, can coder, controllers, etc
@@ -65,7 +75,7 @@ public class ModuleIOReal implements ModuleIO {
 
   @Override
   public void setDriveVoltage(Voltage voltage) {
-
+    driveMotorController.setVoltage(voltage.in(Volts));
   }
 
   @Override
@@ -76,7 +86,7 @@ public class ModuleIOReal implements ModuleIO {
 
   @Override
   public void setSteerVoltage(Voltage voltage) {
-
+    steerMotorController.setVoltage(voltage);
   }
 
   @Override
@@ -111,12 +121,12 @@ public class ModuleIOReal implements ModuleIO {
 
   @Override
   public void setSteerPID(double angle) {
-
+    steerPIDController.setSetpoint(angle);
   }
 
   @Override
   public void setDrivePID(double speed) {
-
+    // driveMotorController.setControl(new VelocityVoltage());
   }
 
   @Override
@@ -135,7 +145,8 @@ public class ModuleIOReal implements ModuleIO {
 
   @Override
   public void tickPID() {
-
+    // TODO this should eventually be using speed instead of voltage
+    setSteerVoltage(Volts.of(steerPIDController.calculate(getSteerAngle().getRadians())));
   }
 
   @Override
