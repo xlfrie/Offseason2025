@@ -6,6 +6,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.dyn4j.geometry.Vector2;
 
@@ -97,6 +98,10 @@ public interface ModuleIO {
    */
   Vector2 getNormalRotationVec();
 
+  default void telemetryHook(SendableBuilder sendableBuilder) {
+
+  }
+
   /**
    * Publishes telemetry for this module into the SmartDashboard
    */
@@ -116,6 +121,8 @@ public interface ModuleIO {
       }, null);
       sendableBuilder.addDoubleProperty("Current Steer Angle",
           () -> MathUtil.angleModulus(getSteerAngle().getRadians()) / Math.PI * 180, null);
+
+      telemetryHook(sendableBuilder);
     });
   }
 }
