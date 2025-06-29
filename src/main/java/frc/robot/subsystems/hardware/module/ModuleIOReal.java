@@ -35,6 +35,8 @@ public class ModuleIOReal implements ModuleIO {
   // TODO this might be better of as a profiled PID controller
   private final PIDController steerPIDController;
 
+  private final VelocityVoltage driveVelocityVoltage;
+
   private final int driveMotorID;
   private final int steerMotorID;
   private final int CANCoderID;
@@ -46,31 +48,26 @@ public class ModuleIOReal implements ModuleIO {
   private final String moduleName;
   private final Vector2 unitRotationVec;
 
-  private final VelocityVoltage driveVelocityVoltage;
-
   // TODO move to constants
   private static final double driveGearRatio = 1 / 6.12;
 
   // TODO BEFORE TEST DRIVE - CHECK MOTOR ENCODER DIRECTIONS - CHECK CAN CODER DIRECTIONS
+  // TODO Document this
   public ModuleIOReal(int driveMotorID, int steerMotorID, int CANCoderID, Angle CANCoderOffset,
       Vector2 physicalModulePosition, String moduleName) {
+
     this.driveMotorID = driveMotorID;
     this.steerMotorID = steerMotorID;
     this.CANCoderID = CANCoderID;
-
     this.CANCoderOffset = CANCoderOffset;
-
     this.moduleName = moduleName;
 
-    this.unitRotationVec = physicalModulePosition.copy().rotate(Math.PI / 2).getNormalized()
-        .multiply(physicalModulePosition.getMagnitude());
 
-    swerveModulePosition = new SwerveModulePosition();
-    desiredState = new SwerveModuleState(0, new Rotation2d());
-    currentState = new SwerveModuleState(0, new Rotation2d());
-
+    // Drive motor config
     driveMotorController = new TalonFX(this.driveMotorID, "rio");
+
     TalonFXConfigurator driveMotorConfigurator = driveMotorController.getConfigurator();
+
     Slot0Configs slot0Configs = new Slot0Configs();
     slot0Configs.kP = Constants.RealRobotConstants.kPDrive;
     slot0Configs.kI = Constants.RealRobotConstants.kIDrive;
@@ -81,8 +78,8 @@ public class ModuleIOReal implements ModuleIO {
 
     driveVelocityVoltage = new VelocityVoltage(0);
 
+    // Azimuth motor config
     steerMotorController = new SparkMax(this.steerMotorID, SparkMax.MotorType.kBrushless);
-
     SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
     // TODO figure out this open loop ramp rate
     sparkMaxConfig.smartCurrentLimit(40).idleMode(SparkBaseConfig.IdleMode.kBrake)
@@ -90,22 +87,28 @@ public class ModuleIOReal implements ModuleIO {
 
     steerPIDController = new PIDController(Constants.RealRobotConstants.kPAzimuth,
         Constants.RealRobotConstants.kIAzimuth, Constants.RealRobotConstants.kDAzimuth);
-
     steerPIDController.enableContinuousInput(-Math.PI, Math.PI);
     steerPIDController.setTolerance(0.05);
 
+    // CANCoder config
     CANCoder = new CANcoder(this.CANCoderID, "rio");
 
-    // TODO figure out if offset can be applied in the CANCoder
     CANcoderConfiguration configuration = new CANcoderConfiguration();
-    // TODO determine if this is correct
     configuration.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+    // TODO determine if this is correct
     configuration.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.5;
     configuration.MagnetSensor.MagnetOffset = -this.CANCoderOffset.in(Rotations);
 
     CANCoder.getConfigurator().apply(configuration);
 
+    // Swerve math setup
+    swerveModulePosition = new SwerveModulePosition();
+    desiredState = new SwerveModuleState(0, new Rotation2d());
+    currentState = new SwerveModuleState(0, new Rotation2d());
 
+    // Explanation for this is in sim implementation
+    this.unitRotationVec = physicalModulePosition.copy().rotate(Math.PI / 2).getNormalized()
+        .multiply(physicalModulePosition.getMagnitude());
 
     telemetry();
   }
@@ -116,13 +119,31 @@ public class ModuleIOReal implements ModuleIO {
   }
 
   @Override
+  public AngularVelocity getDriveWheelVelocity() {
+    return driveMotorController.getVelocity().getValue();
+  }
+
+  @Override
+  public Angle getDriveWheelPosition() {
+    // TODO Ensure this math is correct
+    return driveMotorController.getPosition().getValue().times(driveGearRatio);
+  }
+
+  @Override
   public void setDriveVoltage(Voltage voltage) {
     driveMotorController.setVoltage(voltage.in(Volts));
   }
 
   @Override
+  public void setDrivePID(double speed) {
+    driveVelocityVoltage.Velocity = speed;
+    driveMotorController.setControl(driveVelocityVoltage);
+  }
+
+  @Override
   public Voltage getSteerVoltage() {
     // TODO look for better way of doing this
+    // This may not be correct
     return Volts.of(steerMotorController.get() * RobotController.getBatteryVoltage());
   }
 
@@ -137,14 +158,8 @@ public class ModuleIOReal implements ModuleIO {
   }
 
   @Override
-  public Angle getDriveWheelPosition() {
-    // TODO Ensure this math is correct
-    return driveMotorController.getPosition().getValue().times(driveGearRatio);
-  }
-
-  @Override
-  public AngularVelocity getDriveWheelVelocity() {
-    return driveMotorController.getVelocity().getValue();
+  public void setSteerPID(double angle) {
+    steerPIDController.setSetpoint(angle);
   }
 
   @Override
@@ -164,17 +179,6 @@ public class ModuleIOReal implements ModuleIO {
         Rotations.ofBaseUnits(this.getDriveWheelPosition().baseUnitMagnitude())
             .magnitude() * k_wheelCircumference.magnitude() * driveGearRatio;
     return this.swerveModulePosition;
-  }
-
-  @Override
-  public void setSteerPID(double angle) {
-    steerPIDController.setSetpoint(angle);
-  }
-
-  @Override
-  public void setDrivePID(double speed) {
-    driveVelocityVoltage.Velocity = speed;
-    driveMotorController.setControl(driveVelocityVoltage);
   }
 
   @Override
