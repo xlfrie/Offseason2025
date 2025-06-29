@@ -28,10 +28,52 @@ public final class Constants {
 
   public static class PhysicalRobotConstants {
     public static final Mass kMass = Kilograms.of(35);
-    public static final Distance kDriveBaseLength = Inches.of(24);
+    // TODO verify this and add constant for module positions
+    public static final Distance kDriveBaseLength = Inches.of(25);
 
-    public static final Distance k_wheelRadius = Meters.ofBaseUnits(Inches.of(2).baseUnitMagnitude());
+    public static final Distance k_wheelRadius =
+        Meters.ofBaseUnits(Inches.of(2).baseUnitMagnitude());
     public static final Distance k_wheelCircumference = k_wheelRadius.times(2 * Math.PI);
+  }
+
+
+  public static class RealRobotConstants {
+    public static final int kPigeon2ID = 9;
+
+    public static final int kFRDriveMotorID = 23;
+    public static final int kFLDriveMotorID = 24;
+    public static final int kBLDriveMotorID = 22;
+    public static final int kBRDriveMotorID = 21;
+
+    public static final int kFRAzimuthMotorID = 13;
+    public static final int kFLAzimuthMotorID = 14;
+    public static final int kBLAzimuthMotorID = 12;
+    public static final int kBRAzimuthMotorID = 11;
+
+    public static final int kFRCANCoderID = 33;
+    public static final int kFLCANCoderID = 34;
+    public static final int kBLCANCoderID = 32;
+    public static final int kBRCANCoderID = 31;
+
+    // TODO figure out if this is correct
+    public static final boolean kCANCoderReversed = true;
+    public static final boolean kAzimuthReversed = true;
+
+    // TODO zero these encoders
+    public static final double kFRCANCoderOffset = 0;
+    public static final double kFLCANCoderOffset = 0;
+    public static final double kBLCANCoderOffset = 0;
+    public static final double kBRCANCoderOffset = 0;
+
+    public static final double kPDrive = 0;
+    public static final double kIDrive = 0;
+    public static final double kDDrive = 0;
+    public static final double kSDrive = 0;
+    public static final double kVDrive = 0;
+
+    public static final double kPAzimuth = 0;
+    public static final double kIAzimuth = 0;
+    public static final double kDAzimuth = 0;
   }
 
 

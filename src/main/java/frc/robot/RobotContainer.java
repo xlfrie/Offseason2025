@@ -16,7 +16,9 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.SwerveDrive.DefaultJoystickCommand;
 import frc.robot.subsystems.SwerveDrive.SwerveDrive;
+import frc.robot.subsystems.hardware.gyroscope.GyroIOPigeon2;
 import frc.robot.subsystems.hardware.gyroscope.GyroIOSim;
+import frc.robot.subsystems.hardware.module.ModuleIOReal;
 import frc.robot.subsystems.hardware.module.ModuleIOSim;
 import frc.robot.subsystems.hardware.vision.VisionIO;
 import frc.robot.subsystems.hardware.vision.VisionIOSim;
@@ -29,6 +31,7 @@ import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Radians;
 import static frc.robot.Constants.PhysicalRobotConstants.kDriveBaseLength;
 
 /**
@@ -59,7 +62,29 @@ public class RobotContainer {
   public RobotContainer() {
     if (Robot.isReal()) {
       // Real drive train
-
+      m_swerveDrive = new SwerveDrive(new GyroIOPigeon2(Constants.RealRobotConstants.kPigeon2ID),
+          new ModuleIOReal(Constants.RealRobotConstants.kFLDriveMotorID,
+              Constants.RealRobotConstants.kFLAzimuthMotorID,
+              Constants.RealRobotConstants.kFLCANCoderID,
+              Radians.of(Constants.RealRobotConstants.kFLCANCoderOffset),
+              new Vector2(-k_driveBaseLengthMeters / 2, k_driveBaseLengthMeters / 2), "Front Left"),
+          new ModuleIOReal(Constants.RealRobotConstants.kFRDriveMotorID,
+              Constants.RealRobotConstants.kFRAzimuthMotorID,
+              Constants.RealRobotConstants.kFRCANCoderID,
+              Radians.of(Constants.RealRobotConstants.kFRCANCoderOffset),
+              new Vector2(k_driveBaseLengthMeters / 2, k_driveBaseLengthMeters / 2), "Front Right"),
+          new ModuleIOReal(Constants.RealRobotConstants.kBLDriveMotorID,
+              Constants.RealRobotConstants.kBLAzimuthMotorID,
+              Constants.RealRobotConstants.kBLCANCoderID,
+              Radians.of(Constants.RealRobotConstants.kBLCANCoderOffset),
+              new Vector2(-k_driveBaseLengthMeters / 2, -k_driveBaseLengthMeters / 2), "Back Left"),
+          new ModuleIOReal(Constants.RealRobotConstants.kBRDriveMotorID,
+              Constants.RealRobotConstants.kBRAzimuthMotorID,
+              Constants.RealRobotConstants.kBRCANCoderID,
+              Radians.of(Constants.RealRobotConstants.kBRCANCoderOffset),
+              new Vector2(k_driveBaseLengthMeters / 2, -k_driveBaseLengthMeters / 2),
+              "Back Right"));
+      controller = new DualShock4Controller(Constants.OperatorConstants.kDriverControllerPort);
     } else {
       visionIO = new VisionIOSim();
 
@@ -69,7 +94,8 @@ public class RobotContainer {
       swerveDriveSimulation = new SwerveDriveSimulation(
           DriveTrainSimulationConfig.Default().withGyro(COTS.ofPigeon2())
               .withRobotMass(Units.Pound.of(78)).withSwerveModule(
-                  COTS.ofMark4i(DCMotor.getFalcon500(1), DCMotor.getNEO(1), COTS.WHEELS.COLSONS.cof, 3))
+                  COTS.ofMark4i(DCMotor.getFalcon500(1), DCMotor.getNEO(1),
+                      COTS.WHEELS.COLSONS.cof, 3))
               .withTrackLengthTrackWidth(kDriveBaseLength, kDriveBaseLength),
           new Pose2d(2, 7, Rotation2d.kZero));
 

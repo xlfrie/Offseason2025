@@ -1,8 +1,15 @@
 package frc.robot.subsystems.hardware.module;
 
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.TalonFXConfigurator;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkBaseConfig;
+import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -12,6 +19,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotController;
+import frc.robot.Constants;
 import org.dyn4j.geometry.Vector2;
 
 import static edu.wpi.first.units.Units.*;
@@ -21,6 +29,8 @@ public class ModuleIOReal implements ModuleIO {
   private final TalonFX driveMotorController;
   private final SparkMax steerMotorController;
   private final CANcoder CANCoder;
+
+  private final Angle CANCoderOffset;
 
   // TODO this might be better of as a profiled PID controller
   private final PIDController steerPIDController;
@@ -34,37 +44,68 @@ public class ModuleIOReal implements ModuleIO {
   private final SwerveModuleState currentState;
 
   private final String moduleName;
-  private final Vector2 normalRotationVector;
+  private final Vector2 unitRotationVec;
 
-  private static final double driveGearRatio = 1;
+  private final VelocityVoltage driveVelocityVoltage;
 
+  // TODO move to constants
+  private static final double driveGearRatio = 1 / 6.12;
 
-  public ModuleIOReal(int driveMotorID, int steerMotorID, int CANCoderID,
+  // TODO BEFORE TEST DRIVE - CHECK MOTOR ENCODER DIRECTIONS - CHECK CAN CODER DIRECTIONS
+  public ModuleIOReal(int driveMotorID, int steerMotorID, int CANCoderID, Angle CANCoderOffset,
       Vector2 physicalModulePosition, String moduleName) {
     this.driveMotorID = driveMotorID;
     this.steerMotorID = steerMotorID;
     this.CANCoderID = CANCoderID;
 
+    this.CANCoderOffset = CANCoderOffset;
+
     this.moduleName = moduleName;
 
-    this.normalRotationVector = physicalModulePosition.rotate(Math.PI / 2).getNormalized();
+    this.unitRotationVec = physicalModulePosition.copy().rotate(Math.PI / 2).getNormalized()
+        .multiply(physicalModulePosition.getMagnitude());
 
     swerveModulePosition = new SwerveModulePosition();
     desiredState = new SwerveModuleState(0, new Rotation2d());
     currentState = new SwerveModuleState(0, new Rotation2d());
 
-    // TODO figure out why this said this was on a CANivore in the old code
     driveMotorController = new TalonFX(this.driveMotorID, "rio");
+    TalonFXConfigurator driveMotorConfigurator = driveMotorController.getConfigurator();
+    Slot0Configs slot0Configs = new Slot0Configs();
+    slot0Configs.kP = Constants.RealRobotConstants.kPDrive;
+    slot0Configs.kI = Constants.RealRobotConstants.kIDrive;
+    slot0Configs.kD = Constants.RealRobotConstants.kDDrive;
+    slot0Configs.kV = Constants.RealRobotConstants.kVDrive;
+    slot0Configs.kS = Constants.RealRobotConstants.kSDrive;
+    driveMotorConfigurator.apply(slot0Configs);
+
+    driveVelocityVoltage = new VelocityVoltage(0);
+
     steerMotorController = new SparkMax(this.steerMotorID, SparkMax.MotorType.kBrushless);
 
-    steerPIDController = new PIDController(0.0075, 0, 0);
+    SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
+    // TODO figure out this open loop ramp rate
+    sparkMaxConfig.smartCurrentLimit(40).idleMode(SparkBaseConfig.IdleMode.kBrake)
+        .openLoopRampRate(0.2);
+
+    steerPIDController = new PIDController(Constants.RealRobotConstants.kPAzimuth,
+        Constants.RealRobotConstants.kIAzimuth, Constants.RealRobotConstants.kDAzimuth);
 
     steerPIDController.enableContinuousInput(-Math.PI, Math.PI);
     steerPIDController.setTolerance(0.05);
 
     CANCoder = new CANcoder(this.CANCoderID, "rio");
 
-    // TODO more config, pid, can coder, controllers, etc
+    // TODO figure out if offset can be applied in the CANCoder
+    CANcoderConfiguration configuration = new CANcoderConfiguration();
+    // TODO determine if this is correct
+    configuration.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+    configuration.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.5;
+    configuration.MagnetSensor.MagnetOffset = -this.CANCoderOffset.in(Rotations);
+
+    CANCoder.getConfigurator().apply(configuration);
+
+
 
     telemetry();
   }
@@ -103,7 +144,7 @@ public class ModuleIOReal implements ModuleIO {
 
   @Override
   public AngularVelocity getDriveWheelVelocity() {
-    return null;
+    return driveMotorController.getVelocity().getValue();
   }
 
   @Override
@@ -132,14 +173,16 @@ public class ModuleIOReal implements ModuleIO {
 
   @Override
   public void setDrivePID(double speed) {
-    // driveMotorController.setControl(new VelocityVoltage());
+    driveVelocityVoltage.Velocity = speed;
+    driveMotorController.setControl(driveVelocityVoltage);
   }
 
   @Override
   public void setDesiredState(LinearVelocity speed, Rotation2d angle) {
     if (angle != null)
       this.desiredState.angle = angle;
-    this.desiredState.speedMetersPerSecond = speed.in(MetersPerSecond);
+
+    setDrivePID(speed.in(MetersPerSecond) / k_wheelCircumference.in(Meters) * driveGearRatio);
 
     setSteerPID(desiredState.angle.getRadians());
   }
@@ -151,7 +194,6 @@ public class ModuleIOReal implements ModuleIO {
 
   @Override
   public void tickPID() {
-    // TODO this should eventually be using speed instead of voltage
     setSteerVoltage(Volts.of(steerPIDController.calculate(getSteerAngle().getRadians())));
   }
 
@@ -162,6 +204,6 @@ public class ModuleIOReal implements ModuleIO {
 
   @Override
   public Vector2 getUnitRotationVec() {
-    return normalRotationVector;
+    return unitRotationVec;
   }
 }
