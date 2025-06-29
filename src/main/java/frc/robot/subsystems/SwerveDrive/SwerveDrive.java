@@ -143,6 +143,8 @@ public class SwerveDrive extends SubsystemBase {
     if (absolute)
       translationVector.rotate(-heading);
 
+    translationVector.multiply(3);
+
     /*
       Swerve drive kinematics are fairly simple.
       There are two components to each module's desired state.
@@ -157,7 +159,7 @@ public class SwerveDrive extends SubsystemBase {
 
     // Calculates rotation vector as described
     Vector2 rotationVector =
-        module.getNormalRotationVec().copy().multiply(chassisSpeeds.omegaRadiansPerSecond);
+        module.getUnitRotationVec().copy().multiply(chassisSpeeds.omegaRadiansPerSecond*1*Math.PI);
 
     // This will be the desired state
     translationVector.add(rotationVector);
@@ -184,8 +186,8 @@ public class SwerveDrive extends SubsystemBase {
 
     // TODO find a place in Constants for max translation speed
     // TODO multiplication should probably be moved up to be independent of rotation
-    module.setDesiredState(MetersPerSecond.of(vecMagnitude * 3),
-        translationVector.getMagnitude() == 0 ? null : new Rotation2d(vecAngle));
+    module.setDesiredState(MetersPerSecond.of(vecMagnitude),
+        vecMagnitude == 0 ? null : new Rotation2d(vecAngle));
   }
 
   public ChassisSpeeds getChassisSpeed() {

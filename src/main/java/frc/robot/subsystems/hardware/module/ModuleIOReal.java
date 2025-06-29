@@ -161,7 +161,7 @@ public class ModuleIOReal implements ModuleIO {
   }
 
   @Override
-  public Vector2 getNormalRotationVec() {
+  public Vector2 getUnitRotationVec() {
     return normalRotationVector;
   }
 }

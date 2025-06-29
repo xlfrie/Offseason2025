@@ -97,10 +97,10 @@ public interface ModuleIO {
   String getModuleName();
 
   /**
-   * @return Normalized vector that when set as the desired state for this module will rotate the
-   * robot without translation
+   * @return Vector that when set as the desired state for this module will rotate the
+   * robot without translation at 1 rad / sec
    */
-  Vector2 getNormalRotationVec();
+  Vector2 getUnitRotationVec();
 
   default void telemetryHook(SendableBuilder sendableBuilder) {
 

@@ -28,7 +28,7 @@ public class ModuleIOSim implements ModuleIO {
   private final SwerveModuleState desiredState;
 
   private final String moduleName;
-  private final Vector2 normalRotationVector;
+  private final Vector2 unitRotationVec;
 
   private final Distance simulatedCircumference;
 
@@ -56,7 +56,13 @@ public class ModuleIOSim implements ModuleIO {
     steerPID.enableContinuousInput(-Math.PI, Math.PI);
 
     this.moduleName = moduleName;
-    this.normalRotationVector = physicalPosition.rotate(Math.PI / 2).getNormalized();
+
+    // This unit is 1 rad / sec
+    // Proof: assume the wheel moves along a circle about the robot center. Length of an arc is
+    // radius times angle in radians so the length of the arc is the distance of the module to
+    // the center times one radian 
+    this.unitRotationVec = physicalPosition.copy().rotate(Math.PI / 2).getNormalized()
+        .multiply(physicalPosition.getMagnitude());
 
     this.desiredState = new SwerveModuleState(0, new Rotation2d());
 
@@ -158,8 +164,8 @@ public class ModuleIOSim implements ModuleIO {
   }
 
   @Override
-  public Vector2 getNormalRotationVec() {
-    return normalRotationVector;
+  public Vector2 getUnitRotationVec() {
+    return unitRotationVec;
   }
 
   @Override
