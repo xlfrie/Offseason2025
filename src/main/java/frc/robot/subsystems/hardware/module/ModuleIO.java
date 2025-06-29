@@ -5,6 +5,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -46,6 +48,8 @@ public interface ModuleIO {
    */
   Angle getDriveWheelPosition();
 
+  AngularVelocity getDriveWheelVelocity();
+
   /**
    * @return This module's {@link SwerveModuleState}
    */
@@ -74,7 +78,7 @@ public interface ModuleIO {
    * @param speed The desired state for the wheel's speed
    * @param angle The desired angle for the wheel to face
    */
-  void setDesiredState(double speed, Rotation2d angle);
+  void setDesiredState(LinearVelocity speed, Rotation2d angle);
 
   /**
    * @return The module's desired states

@@ -1,19 +1,19 @@
 package frc.robot.subsystems.hardware.module;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.Units;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.units.measure.*;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import frc.robot.Constants;
 import org.dyn4j.geometry.Vector2;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.motorsims.SimulatedMotorController;
 
 import static edu.wpi.first.units.Units.*;
-import static frc.robot.Constants.PhysicalRobotConstants.k_wheelCircumference;
 
 public class ModuleIOSim implements ModuleIO {
   private final SwerveModuleSimulation swerveModuleSimulation;
@@ -21,11 +21,7 @@ public class ModuleIOSim implements ModuleIO {
   private final SimulatedMotorController.GenericMotorController steerMotor;
   private final SwerveModulePosition swerveModulePosition;
 
-  // TODO move into Constants.java
-  private double k_gearRatio = 1;
-
-
-  // TODO remove drive pid? idk if it's worth
+  private final SimpleMotorFeedforward driveFeedforward;
   private final PIDController drivePID;
   private final PIDController steerPID;
 
@@ -33,6 +29,8 @@ public class ModuleIOSim implements ModuleIO {
 
   private final String moduleName;
   private final Vector2 normalRotationVector;
+
+  private final Distance simulatedCircumference;
 
   public ModuleIOSim(SwerveModuleSimulation swerveModuleSimulation, String moduleName,
       Vector2 physicalPosition) {
@@ -45,6 +43,10 @@ public class ModuleIOSim implements ModuleIO {
     this.steerMotor =
         swerveModuleSimulation.useGenericControllerForSteer().withCurrentLimit(Units.Amps.of(20));
 
+    this.driveFeedforward =
+        new SimpleMotorFeedforward(Constants.SimulatedControlSystemConstants.kSDrive,
+            Constants.SimulatedControlSystemConstants.kVDrive,
+            Constants.SimulatedControlSystemConstants.kADrive);
     this.drivePID = new PIDController(Constants.SimulatedControlSystemConstants.kPDrive,
         Constants.SimulatedControlSystemConstants.kIDrive,
         Constants.SimulatedControlSystemConstants.kDDrive);
@@ -57,6 +59,8 @@ public class ModuleIOSim implements ModuleIO {
     this.normalRotationVector = physicalPosition.rotate(Math.PI / 2).getNormalized();
 
     this.desiredState = new SwerveModuleState(0, new Rotation2d());
+
+    this.simulatedCircumference = swerveModuleSimulation.config.WHEEL_RADIUS.times(2 * Math.PI);
 
     telemetry();
   }
@@ -94,6 +98,11 @@ public class ModuleIOSim implements ModuleIO {
   }
 
   @Override
+  public AngularVelocity getDriveWheelVelocity() {
+    return swerveModuleSimulation.getDriveWheelFinalSpeed();
+  }
+
+  @Override
   public SwerveModuleState getState() {
     return swerveModuleSimulation.getCurrentState();
   }
@@ -102,8 +111,7 @@ public class ModuleIOSim implements ModuleIO {
   public SwerveModulePosition getPosition() {
     swerveModulePosition.angle = this.getSteerAngle();
     swerveModulePosition.distanceMeters =
-        Rotations.ofBaseUnits(this.getDriveWheelPosition().baseUnitMagnitude())
-            .magnitude() * k_wheelCircumference.magnitude() * k_gearRatio;
+        this.getDriveWheelPosition().in(Rotations) * simulatedCircumference.in(Meters);
     return this.swerveModulePosition;
   }
 
@@ -119,10 +127,11 @@ public class ModuleIOSim implements ModuleIO {
 
 
   @Override
-  public void setDesiredState(double speed, Rotation2d angle) {
+  public void setDesiredState(LinearVelocity speed, Rotation2d angle) {
     if (angle != null)
       this.desiredState.angle = angle;
-    this.desiredState.speedMetersPerSecond = speed;
+    this.desiredState.speedMetersPerSecond = speed.in(MetersPerSecond);
+    setDrivePID(desiredState.speedMetersPerSecond);
 
     setSteerPID(desiredState.angle.getRadians());
   }
@@ -136,7 +145,10 @@ public class ModuleIOSim implements ModuleIO {
   public void tickPID() {
     setSteerVoltage(Volts.of(steerPID.calculate(getSteerAngle().getRadians())));
     if (desiredState != null) {
-      setDriveVoltage(Volt.of(desiredState.speedMetersPerSecond * 6));
+
+      setDriveVoltage(Volts.of(drivePID.calculate(
+          getDriveWheelVelocity().in(RotationsPerSecond) * simulatedCircumference.in(
+              Meters)) + driveFeedforward.calculate(desiredState.speedMetersPerSecond)));
     }
   }
 
@@ -148,5 +160,15 @@ public class ModuleIOSim implements ModuleIO {
   @Override
   public Vector2 getNormalRotationVec() {
     return normalRotationVector;
+  }
+
+  @Override
+  public void telemetryHook(SendableBuilder sendableBuilder) {
+    sendableBuilder.addDoubleProperty(getModuleName() + "-dError", () -> drivePID.getError(), null);
+    sendableBuilder.addDoubleProperty(getModuleName() + "-dDesired_speed",
+        () -> desiredState.speedMetersPerSecond, null);
+    sendableBuilder.addDoubleProperty(getModuleName() + "-dReal_speed",
+        () -> getDriveWheelVelocity().in(RotationsPerSecond) * simulatedCircumference.in(Meters),
+        null);
   }
 }

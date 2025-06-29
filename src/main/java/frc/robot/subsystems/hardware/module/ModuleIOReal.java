@@ -1,6 +1,5 @@
 package frc.robot.subsystems.hardware.module;
 
-import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.spark.SparkMax;
@@ -9,6 +8,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotController;
 import org.dyn4j.geometry.Vector2;
@@ -101,6 +102,11 @@ public class ModuleIOReal implements ModuleIO {
   }
 
   @Override
+  public AngularVelocity getDriveWheelVelocity() {
+    return null;
+  }
+
+  @Override
   public SwerveModuleState getState() {
     currentState.angle = this.getSteerAngle();
 
@@ -130,10 +136,10 @@ public class ModuleIOReal implements ModuleIO {
   }
 
   @Override
-  public void setDesiredState(double speed, Rotation2d angle) {
+  public void setDesiredState(LinearVelocity speed, Rotation2d angle) {
     if (angle != null)
       this.desiredState.angle = angle;
-    this.desiredState.speedMetersPerSecond = speed;
+    this.desiredState.speedMetersPerSecond = speed.in(MetersPerSecond);
 
     setSteerPID(desiredState.angle.getRadians());
   }

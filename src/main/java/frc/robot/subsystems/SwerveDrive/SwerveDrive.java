@@ -28,8 +28,7 @@ import org.json.simple.parser.ParseException;
 import java.io.IOException;
 import java.util.Optional;
 
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.*;
 
 public class SwerveDrive extends SubsystemBase {
   private final GyroIO gyro;
@@ -133,6 +132,7 @@ public class SwerveDrive extends SubsystemBase {
     }
   }
 
+  // TODO add skew compensation constant
   private void calculateState(ChassisSpeeds chassisSpeeds, double heading, ModuleIO module,
       boolean absolute) {
     // VY is the desired left velocity, vx is the desired forward velocity
@@ -182,7 +182,9 @@ public class SwerveDrive extends SubsystemBase {
       vecAngle = vecAngle.plus(Radians.of(Math.PI));
     }
 
-    module.setDesiredState(vecMagnitude,
+    // TODO find a place in Constants for max translation speed
+    // TODO multiplication should probably be moved up to be independent of rotation
+    module.setDesiredState(MetersPerSecond.of(vecMagnitude * 3),
         translationVector.getMagnitude() == 0 ? null : new Rotation2d(vecAngle));
   }
 

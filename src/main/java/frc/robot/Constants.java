@@ -36,7 +36,11 @@ public final class Constants {
 
 
   public static class SimulatedControlSystemConstants {
-    public static final double kPDrive = 0.1;
+    public static final double kSDrive = 0;
+    public static final double kVDrive = 2.435;
+    public static final double kADrive = 0;
+
+    public static final double kPDrive = 14;
     public static final double kIDrive = 0;
     public static final double kDDrive = 0;
 
