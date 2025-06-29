@@ -77,6 +77,7 @@ public class ModuleIOReal implements ModuleIO {
     driveMotorConfigurator.apply(slot0Configs);
 
     driveVelocityVoltage = new VelocityVoltage(0);
+    driveVelocityVoltage.Slot = 0;
 
     // Azimuth motor config
     steerMotorController = new SparkMax(this.steerMotorID, SparkMax.MotorType.kBrushless);
@@ -120,7 +121,7 @@ public class ModuleIOReal implements ModuleIO {
 
   @Override
   public AngularVelocity getDriveWheelVelocity() {
-    return driveMotorController.getVelocity().getValue();
+    return driveMotorController.getVelocity().getValue().times(driveGearRatio);
   }
 
   @Override
@@ -148,13 +149,13 @@ public class ModuleIOReal implements ModuleIO {
   }
 
   @Override
-  public void setSteerVoltage(Voltage voltage) {
-    steerMotorController.setVoltage(voltage);
+  public Rotation2d getSteerAngle() {
+    return new Rotation2d(CANCoder.getAbsolutePosition().getValue());
   }
 
   @Override
-  public Rotation2d getSteerAngle() {
-    return new Rotation2d(CANCoder.getAbsolutePosition().getValue());
+  public void setSteerVoltage(Voltage voltage) {
+    steerMotorController.setVoltage(voltage);
   }
 
   @Override
@@ -182,6 +183,11 @@ public class ModuleIOReal implements ModuleIO {
   }
 
   @Override
+  public SwerveModuleState getDesiredState() {
+    return desiredState;
+  }
+
+  @Override
   public void setDesiredState(LinearVelocity speed, Rotation2d angle) {
     if (angle != null)
       this.desiredState.angle = angle;
@@ -189,11 +195,6 @@ public class ModuleIOReal implements ModuleIO {
     setDrivePID(speed.in(MetersPerSecond) / k_wheelCircumference.in(Meters) * driveGearRatio);
 
     setSteerPID(desiredState.angle.getRadians());
-  }
-
-  @Override
-  public SwerveModuleState getDesiredState() {
-    return desiredState;
   }
 
   @Override

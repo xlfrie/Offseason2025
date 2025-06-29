@@ -43,6 +43,9 @@ public class SwerveDrive extends SubsystemBase {
   private final StructArrayPublisher<SwerveModuleState> currentModuleStatesPublisher =
       NetworkTableInstance.getDefault()
           .getStructArrayTopic("Current Module States", SwerveModuleState.struct).publish();
+  private final StructArrayPublisher<SwerveModuleState> desiredModuleStatesPublisher =
+      NetworkTableInstance.getDefault()
+          .getStructArrayTopic("Desired Module States", SwerveModuleState.struct).publish();
 
   // This is used to calculate what the heading is relative to the driver station, changes based
   // on alliance
@@ -125,6 +128,9 @@ public class SwerveDrive extends SubsystemBase {
   private void publishTelemetry() {
     posePublisher.set(swerveDrivePoseEstimator.getEstimatedPosition());
     currentModuleStatesPublisher.set(getModuleStates());
+    desiredModuleStatesPublisher.set(
+        new SwerveModuleState[] {frontLeft.getDesiredState(), frontRight.getDesiredState(),
+            backLeft.getDesiredState(), backRight.getDesiredState()});
 
     // TODO move this into robot container
     if (realPosePublisher != null && RobotContainer.swerveDriveSimulation != null) {
@@ -158,8 +164,8 @@ public class SwerveDrive extends SubsystemBase {
 
 
     // Calculates rotation vector as described
-    Vector2 rotationVector =
-        module.getUnitRotationVec().copy().multiply(chassisSpeeds.omegaRadiansPerSecond*1*Math.PI);
+    Vector2 rotationVector = module.getUnitRotationVec().copy()
+        .multiply(chassisSpeeds.omegaRadiansPerSecond * 1 * Math.PI);
 
     // This will be the desired state
     translationVector.add(rotationVector);
