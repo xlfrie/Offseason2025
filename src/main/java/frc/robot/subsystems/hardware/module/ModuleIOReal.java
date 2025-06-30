@@ -18,6 +18,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.Constants;
 import org.dyn4j.geometry.Vector2;
@@ -192,14 +193,14 @@ public class ModuleIOReal implements ModuleIO {
     if (angle != null)
       this.desiredState.angle = angle;
 
-    setDrivePID(speed.in(MetersPerSecond) / k_wheelCircumference.in(Meters) * driveGearRatio);
+    setDrivePID(speed.in(MetersPerSecond) / k_wheelCircumference.in(Meters) / driveGearRatio);
 
     setSteerPID(desiredState.angle.getRadians());
   }
 
   @Override
   public void tickPID() {
-    setSteerVoltage(Volts.of(steerPIDController.calculate(getSteerAngle().getRadians())));
+    setSteerVoltage(Volts.of(-steerPIDController.calculate(getSteerAngle().getRadians())));
   }
 
   @Override
@@ -210,5 +211,11 @@ public class ModuleIOReal implements ModuleIO {
   @Override
   public Vector2 getUnitRotationVec() {
     return unitRotationVec;
+  }
+
+  @Override
+  public void telemetryHook(SendableBuilder sendableBuilder) {
+    sendableBuilder.addDoubleProperty(moduleName + "-azimuthError", () -> steerPIDController.getError(), null);
+    sendableBuilder.addDoubleProperty(moduleName + "-driveError", () -> driveMotorController.getClosedLoopError().getValueAsDouble(), null);
   }
 }

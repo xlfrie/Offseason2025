@@ -138,6 +138,10 @@ public class RobotContainer {
             controller::getRightX, m_swerveDrive));
   }
 
+  public void zeroHeading() {
+    m_swerveDrive.zeroHeading();
+  }
+
   /**
    * Removes the controller from being used for movement.
    */

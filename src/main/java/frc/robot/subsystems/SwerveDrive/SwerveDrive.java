@@ -149,7 +149,7 @@ public class SwerveDrive extends SubsystemBase {
     if (absolute)
       translationVector.rotate(-heading);
 
-    translationVector.multiply(3);
+    translationVector.multiply(1.5);
 
     /*
       Swerve drive kinematics are fairly simple.

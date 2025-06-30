@@ -22,7 +22,7 @@ public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
 
-    public static final double kDeadbandThreshold = 0.05;
+    public static final double kDeadbandThreshold = 0.08;
   }
 
 
@@ -60,18 +60,18 @@ public final class Constants {
     public static final boolean kAzimuthReversed = true;
 
     // TODO zero these encoders
-    public static final double kFRCANCoderOffset = 0;
-    public static final double kFLCANCoderOffset = 0;
-    public static final double kBLCANCoderOffset = 0;
-    public static final double kBRCANCoderOffset = 0;
+    public static final double kFRCANCoderOffset = 0.096*Math.PI*2;
+    public static final double kFLCANCoderOffset = 0.655*Math.PI*2;
+    public static final double kBLCANCoderOffset = 0.919*Math.PI*2;
+    public static final double kBRCANCoderOffset = 0.117*Math.PI*2;
 
-    public static final double kPDrive = 0;
+    public static final double kPDrive = 0.125;
     public static final double kIDrive = 0;
-    public static final double kDDrive = 0;
+    public static final double kDDrive = 0.01;
     public static final double kSDrive = 0;
-    public static final double kVDrive = 0;
+    public static final double kVDrive = 0.11;
 
-    public static final double kPAzimuth = 0;
+    public static final double kPAzimuth = 5;
     public static final double kIAzimuth = 0;
     public static final double kDAzimuth = 0;
   }
