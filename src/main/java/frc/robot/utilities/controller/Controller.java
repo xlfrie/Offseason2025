@@ -1,5 +1,7 @@
 package frc.robot.utilities.controller;
 
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+
 public interface Controller {
   /**
    * @return The amount of x on the left joystick.
@@ -20,4 +22,10 @@ public interface Controller {
    * @return The amount of y on the right joystick.
    */
   double getRightY();
+
+  Trigger right1();
+
+  Trigger cross();
+
+  Trigger circle();
 }

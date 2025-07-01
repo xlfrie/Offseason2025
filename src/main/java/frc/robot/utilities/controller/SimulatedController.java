@@ -1,6 +1,7 @@
 package frc.robot.utilities.controller;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class SimulatedController implements Controller {
   private final Joystick leftJoystick;
@@ -33,5 +34,21 @@ public class SimulatedController implements Controller {
   @Override
   public double getRightY() {
     return rightJoystick.getY();
+  }
+
+  // TODO implement
+  @Override
+  public Trigger right1() {
+    return null;
+  }
+
+  @Override
+  public Trigger cross() {
+    return null;
+  }
+
+  @Override
+  public Trigger circle() {
+    return null;
   }
 }

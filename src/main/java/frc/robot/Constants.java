@@ -38,6 +38,8 @@ public final class Constants {
 
 
   public static class RealRobotConstants {
+    public static final int kIntakeMotorID = 2;
+
     public static final int kPigeon2ID = 9;
 
     public static final int kFRDriveMotorID = 23;

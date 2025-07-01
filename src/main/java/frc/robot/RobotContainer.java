@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.SwerveDrive.DefaultJoystickCommand;
 import frc.robot.subsystems.SwerveDrive.SwerveDrive;
+import frc.robot.subsystems.hardware.Intake;
 import frc.robot.subsystems.hardware.gyroscope.GyroIOPigeon2;
 import frc.robot.subsystems.hardware.gyroscope.GyroIOSim;
 import frc.robot.subsystems.hardware.module.ModuleIOReal;
@@ -43,6 +44,7 @@ import static frc.robot.Constants.PhysicalRobotConstants.kDriveBaseLength;
 public class RobotContainer {
   private SwerveDrive m_swerveDrive;
   private Controller controller;
+  private Intake intake;
 
   public static SwerveDriveSimulation swerveDriveSimulation;
 
@@ -84,6 +86,7 @@ public class RobotContainer {
               Radians.of(Constants.RealRobotConstants.kBRCANCoderOffset),
               new Vector2(k_driveBaseLengthMeters / 2, -k_driveBaseLengthMeters / 2),
               "Back Right"));
+      intake = new Intake();
       controller = new DualShock4Controller(Constants.OperatorConstants.kDriverControllerPort);
     } else {
       visionIO = new VisionIOSim();
@@ -127,6 +130,14 @@ public class RobotContainer {
    */
 
   private void configureBindings() {
+    controller.right1().onTrue(intake.reverse());
+    controller.right1().onFalse(intake.idle());
+
+    controller.cross().onTrue(intake.normal());
+    controller.cross().onFalse(intake.idle());
+
+    controller.circle().onTrue(intake.fast());
+    controller.circle().onFalse(intake.idle());
   }
 
   /**
