@@ -56,14 +56,14 @@ public final class Constants {
     public static final int kBRCANCoderID = 31;
 
     // TODO figure out if this is correct
-    public static final boolean kCANCoderReversed = true;
+    public static final boolean kDriveReversed = false;
     public static final boolean kAzimuthReversed = true;
 
     // TODO zero these encoders
-    public static final double kFRCANCoderOffset = 0.096*Math.PI*2;
-    public static final double kFLCANCoderOffset = 0.655*Math.PI*2;
-    public static final double kBLCANCoderOffset = 0.919*Math.PI*2;
-    public static final double kBRCANCoderOffset = 0.117*Math.PI*2;
+    public static final double kFRCANCoderOffset = 0.096 * Math.PI * 2;
+    public static final double kFLCANCoderOffset = 0.655 * Math.PI * 2;
+    public static final double kBLCANCoderOffset = 0.919 * Math.PI * 2;
+    public static final double kBRCANCoderOffset = 0.117 * Math.PI * 2;
 
     public static final double kPDrive = 0.125;
     public static final double kIDrive = 0;

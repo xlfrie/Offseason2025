@@ -1,11 +1,14 @@
 package frc.robot.subsystems.hardware.module;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig;
@@ -52,7 +55,6 @@ public class ModuleIOReal implements ModuleIO {
   // TODO move to constants
   private static final double driveGearRatio = 1 / 6.12;
 
-  // TODO BEFORE TEST DRIVE - CHECK MOTOR ENCODER DIRECTIONS - CHECK CAN CODER DIRECTIONS
   // TODO Document this
   public ModuleIOReal(int driveMotorID, int steerMotorID, int CANCoderID, Angle CANCoderOffset,
       Vector2 physicalModulePosition, String moduleName) {
@@ -76,6 +78,11 @@ public class ModuleIOReal implements ModuleIO {
     slot0Configs.kV = Constants.RealRobotConstants.kVDrive;
     slot0Configs.kS = Constants.RealRobotConstants.kSDrive;
     driveMotorConfigurator.apply(slot0Configs);
+    // TODO verify falcon is ccw+
+    // driveMotorConfigurator.apply(new MotorOutputConfigs().withInverted(
+    //     Constants.RealRobotConstants.kDriveReversed ?
+    //         InvertedValue.Clockwise_Positive :
+    //         InvertedValue.CounterClockwise_Positive).withNeutralMode(NeutralModeValue.Brake));
 
     driveVelocityVoltage = new VelocityVoltage(0);
     driveVelocityVoltage.Slot = 0;
@@ -86,6 +93,7 @@ public class ModuleIOReal implements ModuleIO {
     // TODO figure out this open loop ramp rate
     sparkMaxConfig.smartCurrentLimit(40).idleMode(SparkBaseConfig.IdleMode.kBrake)
         .openLoopRampRate(0.2);
+    sparkMaxConfig.inverted(Constants.RealRobotConstants.kAzimuthReversed);
 
     steerPIDController = new PIDController(Constants.RealRobotConstants.kPAzimuth,
         Constants.RealRobotConstants.kIAzimuth, Constants.RealRobotConstants.kDAzimuth);
@@ -200,7 +208,7 @@ public class ModuleIOReal implements ModuleIO {
 
   @Override
   public void tickPID() {
-    setSteerVoltage(Volts.of(-steerPIDController.calculate(getSteerAngle().getRadians())));
+    setSteerVoltage(Volts.of(steerPIDController.calculate(getSteerAngle().getRadians())));
   }
 
   @Override
@@ -215,7 +223,9 @@ public class ModuleIOReal implements ModuleIO {
 
   @Override
   public void telemetryHook(SendableBuilder sendableBuilder) {
-    sendableBuilder.addDoubleProperty(moduleName + "-azimuthError", () -> steerPIDController.getError(), null);
-    sendableBuilder.addDoubleProperty(moduleName + "-driveError", () -> driveMotorController.getClosedLoopError().getValueAsDouble(), null);
+    sendableBuilder.addDoubleProperty(moduleName + "-azimuthError",
+        () -> steerPIDController.getError(), null);
+    sendableBuilder.addDoubleProperty(moduleName + "-driveError",
+        () -> driveMotorController.getClosedLoopError().getValueAsDouble(), null);
   }
 }
