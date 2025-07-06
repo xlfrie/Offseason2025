@@ -130,14 +130,17 @@ public class RobotContainer {
    */
 
   private void configureBindings() {
-    controller.right1().onTrue(intake.reverse());
-    controller.right1().onFalse(intake.idle());
-
-    controller.cross().onTrue(intake.normal());
-    controller.cross().onFalse(intake.idle());
-
-    controller.circle().onTrue(intake.fast());
-    controller.circle().onFalse(intake.idle());
+    if (Robot.isReal())
+    {
+      controller.right1().onTrue(intake.reverse());
+      controller.right1().onFalse(intake.idle());
+  
+      controller.cross().onTrue(intake.normal());
+      controller.cross().onFalse(intake.idle());
+  
+      controller.circle().onTrue(intake.fast());
+      controller.circle().onFalse(intake.idle());
+    }
   }
 
   /**
