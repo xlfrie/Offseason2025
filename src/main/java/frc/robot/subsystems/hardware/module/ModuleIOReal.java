@@ -1,14 +1,11 @@
 package frc.robot.subsystems.hardware.module;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig;
@@ -38,6 +35,9 @@ public class ModuleIOReal implements ModuleIO {
 
   // TODO this might be better of as a profiled PID controller
   private final PIDController steerPIDController;
+
+  private final int steerVoltageCoefficient =
+      Constants.RealRobotConstants.kAzimuthReversed ? -1 : 1;
 
   private final VelocityVoltage driveVelocityVoltage;
 
@@ -93,7 +93,6 @@ public class ModuleIOReal implements ModuleIO {
     // TODO figure out this open loop ramp rate
     sparkMaxConfig.smartCurrentLimit(40).idleMode(SparkBaseConfig.IdleMode.kBrake)
         .openLoopRampRate(0.2);
-    sparkMaxConfig.inverted(Constants.RealRobotConstants.kAzimuthReversed);
 
     steerPIDController = new PIDController(Constants.RealRobotConstants.kPAzimuth,
         Constants.RealRobotConstants.kIAzimuth, Constants.RealRobotConstants.kDAzimuth);
@@ -208,7 +207,8 @@ public class ModuleIOReal implements ModuleIO {
 
   @Override
   public void tickPID() {
-    setSteerVoltage(Volts.of(steerPIDController.calculate(getSteerAngle().getRadians())));
+    setSteerVoltage(Volts.of(
+        steerVoltageCoefficient * steerPIDController.calculate(getSteerAngle().getRadians())));
   }
 
   @Override
