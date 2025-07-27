@@ -94,6 +94,9 @@ public class ModuleIOReal implements ModuleIO {
     sparkMaxConfig.smartCurrentLimit(40).idleMode(SparkBaseConfig.IdleMode.kBrake)
         .openLoopRampRate(0.2);
 
+    steerMotorController.configure(sparkMaxConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters);
+
+
     steerPIDController = new PIDController(Constants.RealRobotConstants.kPAzimuth,
         Constants.RealRobotConstants.kIAzimuth, Constants.RealRobotConstants.kDAzimuth);
     steerPIDController.enableContinuousInput(-Math.PI, Math.PI);
