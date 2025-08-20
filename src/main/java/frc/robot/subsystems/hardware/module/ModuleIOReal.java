@@ -1,12 +1,11 @@
 package frc.robot.subsystems.hardware.module;
 
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.configs.TalonFXConfigurator;
+import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
+import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -229,6 +228,6 @@ public class ModuleIOReal implements ModuleIO {
     sendableBuilder.addDoubleProperty(moduleName + "-azimuthError",
         () -> steerPIDController.getError(), null);
     sendableBuilder.addDoubleProperty(moduleName + "-driveError",
-        () -> driveMotorController.getClosedLoopError().getValueAsDouble(), null);
+        () -> driveMotorController.getVelocity().getValueAsDouble() - driveVelocityVoltage.Velocity, null);
   }
 }

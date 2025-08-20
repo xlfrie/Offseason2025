@@ -9,6 +9,7 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.*;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 import org.dyn4j.geometry.Vector2;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.motorsims.SimulatedMotorController;
@@ -39,7 +40,7 @@ public class ModuleIOSim implements ModuleIO {
     this.swerveModulePosition = new SwerveModulePosition();
 
     this.driveMotor = swerveModuleSimulation.useGenericMotorControllerForDrive()
-        .withCurrentLimit(Units.Amps.of(40));
+        .withCurrentLimit(Units.Amps.of(80));
     this.steerMotor =
         swerveModuleSimulation.useGenericControllerForSteer().withCurrentLimit(Units.Amps.of(20));
 
@@ -168,6 +169,7 @@ public class ModuleIOSim implements ModuleIO {
     return unitRotationVec;
   }
 
+
   @Override
   public void telemetryHook(SendableBuilder sendableBuilder) {
     sendableBuilder.addDoubleProperty(getModuleName() + "-dError", () -> drivePID.getError(), null);
@@ -176,5 +178,6 @@ public class ModuleIOSim implements ModuleIO {
     sendableBuilder.addDoubleProperty(getModuleName() + "-dReal_speed",
         () -> getDriveWheelVelocity().in(RotationsPerSecond) * simulatedCircumference.in(Meters),
         null);
+    sendableBuilder.addDoubleProperty(getModuleName()+"dacc", () -> RobotContainer.swerveDriveSimulation.getForce().getMagnitude()/Constants.PhysicalRobotConstants.kMass.in(Kilogram), null);
   }
 }

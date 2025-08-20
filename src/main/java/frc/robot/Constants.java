@@ -29,10 +29,9 @@ public final class Constants {
   public static class PhysicalRobotConstants {
     public static final Mass kMass = Kilograms.of(35);
     // TODO verify this and add constant for module positions
-    public static final Distance kDriveBaseLength = Inches.of(25);
+    public static final Distance kDriveBaseLength = Inches.of(20);
 
-    public static final Distance k_wheelRadius =
-        Meters.ofBaseUnits(Inches.of(2).baseUnitMagnitude());
+    public static final Distance k_wheelRadius = Inches.of(2);
     public static final Distance k_wheelCircumference = k_wheelRadius.times(2 * Math.PI);
   }
 

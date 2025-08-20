@@ -30,8 +30,7 @@ import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.*;
 import static frc.robot.Constants.PhysicalRobotConstants.kDriveBaseLength;
 
 /**
@@ -93,10 +92,11 @@ public class RobotContainer {
       // TODO add constant for drive base length
       swerveDriveSimulation = new SwerveDriveSimulation(
           DriveTrainSimulationConfig.Default().withGyro(COTS.ofPigeon2())
-              .withRobotMass(Units.Pound.of(78)).withSwerveModule(
+              .withRobotMass(Units.Pound.of(75)).withSwerveModule(
                   COTS.ofMark4i(DCMotor.getFalcon500(1), DCMotor.getNEO(1),
-                      COTS.WHEELS.COLSONS.cof, 3))
-              .withTrackLengthTrackWidth(kDriveBaseLength, kDriveBaseLength),
+                      COTS.WHEELS.DEFAULT_NEOPRENE_TREAD.cof, 3))
+              .withTrackLengthTrackWidth(kDriveBaseLength, kDriveBaseLength)
+              .withBumperSize(Inches.of(31), Inches.of(31)),
           new Pose2d(2, 7, Rotation2d.kZero));
 
       // TODO change this to not assume square drivebase
@@ -153,7 +153,7 @@ public class RobotContainer {
    * Gets path planner auto to be run during autonomous.
    */
   public PathPlannerAuto getAutonomousCommand() {
-    return new PathPlannerAuto("New Auto");
+    return new PathPlannerAuto("New New Auto");
   }
 
   /**

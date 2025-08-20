@@ -81,7 +81,7 @@ public class SwerveDrive extends SubsystemBase {
     // TODO move pid constants to constants file (pls help i dont wanna do this)
     AutoBuilder.configure(this::getPose, this::setPose, this::getChassisSpeed,
         (ChassisSpeeds speeds) -> this.drive(speeds, false),
-        new PPHolonomicDriveController(new PIDConstants(10, 2, 0), new PIDConstants(4, 8, 0.3)),
+        new PPHolonomicDriveController(new PIDConstants(8, 3, 0), new PIDConstants(4, 8, 0.3)),
         ppConfig, () -> {
           Optional<DriverStation.Alliance> allianceOptional = DriverStation.getAlliance();
 
@@ -149,7 +149,6 @@ public class SwerveDrive extends SubsystemBase {
     if (absolute)
       translationVector.rotate(-heading);
 
-    translationVector.multiply(1.5);
 
     /*
       Swerve drive kinematics are fairly simple.
@@ -239,6 +238,7 @@ public class SwerveDrive extends SubsystemBase {
 
   public void initTelemetry() {
     SmartDashboard.putData("SwerveDriveTelemetry", (builder) -> {
+      builder.addDoubleProperty("velocity", () -> RobotContainer.swerveDriveSimulation.getLinearVelocity().getMagnitude(), null);
       builder.setSmartDashboardType("SwerveDriveTelemetry");
     });
   }

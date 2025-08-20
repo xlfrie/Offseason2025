@@ -4,15 +4,15 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.hardware.vision.VisionIOSim;
 import org.ironmaple.simulation.SimulatedArena;
 
 public class Robot extends TimedRobot {
   private final RobotContainer m_robotContainer;
-  private PathPlannerAuto autonomousCommand;
+  private Command autonomousCommand;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -106,7 +106,7 @@ public class Robot extends TimedRobot {
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {
-      ((VisionIOSim) RobotContainer.visionIO).tick();
+    ((VisionIOSim) RobotContainer.visionIO).tick();
 
 
     SimulatedArena.getInstance().simulationPeriodic();
