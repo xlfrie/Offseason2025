@@ -11,7 +11,7 @@ import edu.wpi.first.units.measure.*;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
-import org.dyn4j.geometry.Vector2;
+import frc.robot.subsystems.SwerveDrive.SwerveDriveConfigurator;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.motorsims.SimulatedMotorController;
 
@@ -34,9 +34,14 @@ public class ModuleIOSim implements ModuleIO {
 
   private final Distance simulatedCircumference;
 
-  public ModuleIOSim(SwerveModuleSimulation swerveModuleSimulation, String moduleName,
-      Translation2d physicalPosition) {
+  private final SwerveDriveConfigurator.SwerveDriveModuleConstants moduleConstants;
+
+  public ModuleIOSim(SwerveModuleSimulation swerveModuleSimulation,
+      SwerveDriveConfigurator.SwerveModuleCornerPosition cornerPosition,
+      SwerveDriveConfigurator swerveDriveConfigurator) {
     this.swerveModuleSimulation = swerveModuleSimulation;
+
+    this.moduleConstants = swerveDriveConfigurator.getModuleConstants(cornerPosition);
 
     this.swerveModulePosition = new SwerveModulePosition();
 
@@ -46,27 +51,23 @@ public class ModuleIOSim implements ModuleIO {
         swerveModuleSimulation.useGenericControllerForSteer().withCurrentLimit(Units.Amps.of(20));
 
     this.driveFeedforward =
-        new SimpleMotorFeedforward(Constants.SimulatedControlSystemConstants.kSDrive,
-            Constants.SimulatedControlSystemConstants.kVDrive,
-            Constants.SimulatedControlSystemConstants.kADrive);
-    this.drivePID = new PIDController(Constants.SimulatedControlSystemConstants.kPDrive,
-        Constants.SimulatedControlSystemConstants.kIDrive,
-        Constants.SimulatedControlSystemConstants.kDDrive);
-    this.steerPID = new PIDController(Constants.SimulatedControlSystemConstants.kPSteer,
-        Constants.SimulatedControlSystemConstants.kISteer,
-        Constants.SimulatedControlSystemConstants.kDSteer);
+        new SimpleMotorFeedforward(moduleConstants.kSDrive, moduleConstants.kVDrive, 0);
+    this.drivePID = new PIDController(moduleConstants.kPDrive, moduleConstants.kIDrive,
+        moduleConstants.kDDrive);
+    this.steerPID = new PIDController(moduleConstants.kPAzimuth, moduleConstants.kIAzimuth,
+        moduleConstants.kDAzimuth);
     steerPID.enableContinuousInput(-Math.PI, Math.PI);
 
-    this.moduleName = moduleName;
+    this.moduleName = moduleConstants.getModuleName();
 
     // This unit is 1 rad / sec
     // Proof: assume the wheel moves along a circle about the robot center. Length of an arc is
     // radius times angle in radians, so the length of the arc is the distance of the module to
     // the center times one radian 
-    this.unitRotationVec = physicalPosition.rotateBy(Rotation2d.kCCW_90deg);
+    this.unitRotationVec = moduleConstants.physicalModulePosition.rotateBy(Rotation2d.kCCW_90deg);
     this.desiredState = new SwerveModuleState(0, new Rotation2d());
 
-    this.simulatedCircumference = swerveModuleSimulation.config.WHEEL_RADIUS.times(2 * Math.PI);
+    this.simulatedCircumference = swerveDriveConfigurator.swerveDriveRobotConstants.wheelCircumference;
 
     telemetry();
   }
@@ -177,6 +178,8 @@ public class ModuleIOSim implements ModuleIO {
     sendableBuilder.addDoubleProperty(getModuleName() + "-dReal_speed",
         () -> getDriveWheelVelocity().in(RotationsPerSecond) * simulatedCircumference.in(Meters),
         null);
-    sendableBuilder.addDoubleProperty(getModuleName()+"dacc", () -> RobotContainer.swerveDriveSimulation.getForce().getMagnitude()/Constants.PhysicalRobotConstants.kMass.in(Kilogram), null);
+    sendableBuilder.addDoubleProperty(getModuleName() + "dacc",
+        () -> RobotContainer.swerveDriveSimulation.getForce()
+            .getMagnitude() / Constants.PhysicalRobotConstants.kMass.in(Kilogram), null);
   }
 }

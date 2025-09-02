@@ -1,12 +1,14 @@
 package frc.robot.utilities.controller;
 
 import edu.wpi.first.wpilibj.PS4Controller;
+import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class DualShock4Controller implements Controller {
-  private final PS4Controller ps4Controller;
+  private final CommandPS4Controller ps4Controller;
 
   public DualShock4Controller(int port) {
-    ps4Controller = new PS4Controller(port);
+    ps4Controller = new CommandPS4Controller(port);
   }
 
   @Override
@@ -27,5 +29,10 @@ public class DualShock4Controller implements Controller {
   @Override
   public double getRightY() {
     return ps4Controller.getRightY();
+  }
+
+  @Override
+  public Trigger zero() {
+    return ps4Controller.R1();
   }
 }

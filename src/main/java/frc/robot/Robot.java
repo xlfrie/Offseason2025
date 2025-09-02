@@ -75,8 +75,6 @@ public class Robot extends TimedRobot {
     // Make sure that our movement command is registered
     m_robotContainer.bindJoystickCommand();
 
-    m_robotContainer.zeroHeading();
-
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }

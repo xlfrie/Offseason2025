@@ -23,7 +23,6 @@ import frc.robot.Robot;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.hardware.gyroscope.GyroIO;
 import frc.robot.subsystems.hardware.module.ModuleIO;
-import org.dyn4j.geometry.Vector2;
 import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
@@ -142,13 +141,19 @@ public class SwerveDrive extends SubsystemBase {
   // TODO add skew compensation constant
   private void calculateState(ChassisSpeeds chassisSpeeds, double heading, ModuleIO module,
       boolean absolute) {
+    // Early clear state
+    if (chassisSpeeds.vxMetersPerSecond == 0 && chassisSpeeds.vyMetersPerSecond == 0) {
+      module.setDesiredState(MetersPerSecond.zero(), null);
+      return;
+    }
+
     // VY is the desired left velocity, vx is the desired forward velocity
     Translation2d translationVector =
         new Translation2d(-chassisSpeeds.vyMetersPerSecond, chassisSpeeds.vxMetersPerSecond);
 
     // Accounts for heading in absolute movement, this is all the absolute flag does
     if (absolute)
-      translationVector.rotateBy(Rotation2d.fromRadians(-heading));
+      translationVector = translationVector.rotateBy(Rotation2d.fromRadians(-heading));
 
 
     /*
@@ -164,10 +169,11 @@ public class SwerveDrive extends SubsystemBase {
 
 
     // Calculates rotation vector as described
-    Translation2d rotationVector = module.getUnitRotationVec().times(chassisSpeeds.omegaRadiansPerSecond * 1 * Math.PI);
+    Translation2d rotationVector =
+        module.getUnitRotationVec().times(chassisSpeeds.omegaRadiansPerSecond * 1 * Math.PI);
 
     // This will be the desired state
-    translationVector.plus(rotationVector);
+    translationVector = translationVector.plus(rotationVector);
 
     // Gets the angle of the vector, 90 degrees is subtracted from the calculated angle because 
     // heading angle's zero is set 90 degrees counterclockwise
@@ -191,8 +197,7 @@ public class SwerveDrive extends SubsystemBase {
 
     // TODO find a place in Constants for max translation speed
     // TODO multiplication should probably be moved up to be independent of rotation
-    module.setDesiredState(MetersPerSecond.of(vecMagnitude),
-        vecMagnitude == 0 ? null : new Rotation2d(vecAngle));
+    module.setDesiredState(MetersPerSecond.of(vecMagnitude), new Rotation2d(vecAngle));
   }
 
   public ChassisSpeeds getChassisSpeed() {
@@ -233,12 +238,14 @@ public class SwerveDrive extends SubsystemBase {
   }
 
   public void zeroHeading() {
-    setHeading(Rotation2d.kZero);
+    swerveDrivePoseEstimator.resetPosition(gyro.getRotation(), getModulePositions(),
+        new Pose2d(getPose().getTranslation(), Rotation2d.kZero));
   }
 
   public void initTelemetry() {
     SmartDashboard.putData("SwerveDriveTelemetry", (builder) -> {
-      builder.addDoubleProperty("velocity", () -> RobotContainer.swerveDriveSimulation.getLinearVelocity().getMagnitude(), null);
+      builder.addDoubleProperty("velocity",
+          () -> RobotContainer.swerveDriveSimulation.getLinearVelocity().getMagnitude(), null);
       builder.setSmartDashboardType("SwerveDriveTelemetry");
     });
   }

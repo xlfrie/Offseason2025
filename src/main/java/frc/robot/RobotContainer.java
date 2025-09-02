@@ -12,6 +12,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.SwerveDrive.DefaultJoystickCommand;
@@ -25,7 +26,6 @@ import frc.robot.subsystems.hardware.vision.VisionIO;
 import frc.robot.subsystems.hardware.vision.VisionIOSim;
 import frc.robot.utilities.controller.Controller;
 import frc.robot.utilities.controller.DualShock4Controller;
-import org.dyn4j.geometry.Vector2;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -129,16 +129,44 @@ public class RobotContainer {
               .withTrackLengthTrackWidth(Inches.of(20), Inches.of(20))
               .withBumperSize(Inches.of(31), Inches.of(31)), new Pose2d(2, 7, Rotation2d.kZero));
 
+      SwerveDriveConfigurator.SwerveDriveModuleConstants FLModuleConstants =
+          new SwerveDriveConfigurator.SwerveDriveModuleConstants(
+              SwerveDriveConfigurator.SwerveModuleCornerPosition.FRONT_LEFT, 0, 0, 0, 0,
+              Constants.SimulatedControlSystemConstants.kPDrive,
+              Constants.SimulatedControlSystemConstants.kIDrive,
+              Constants.SimulatedControlSystemConstants.kDDrive, 0,
+              Constants.SimulatedControlSystemConstants.kVDrive,
+              Constants.SimulatedControlSystemConstants.kPSteer,
+              Constants.SimulatedControlSystemConstants.kISteer,
+              Constants.SimulatedControlSystemConstants.kDSteer, 0, 2, true, 1 / 6.12);
+      SwerveDriveConfigurator.SwerveDriveModuleConstants FRModuleConstants =
+          new SwerveDriveConfigurator.SwerveDriveModuleConstants(FLModuleConstants,
+              SwerveDriveConfigurator.SwerveModuleCornerPosition.FRONT_RIGHT, 0, 0, 0, 0);
+      SwerveDriveConfigurator.SwerveDriveModuleConstants BLModuleConstants =
+          new SwerveDriveConfigurator.SwerveDriveModuleConstants(FLModuleConstants,
+              SwerveDriveConfigurator.SwerveModuleCornerPosition.BACK_LEFT, 0, 0, 0, 0);
+      SwerveDriveConfigurator.SwerveDriveModuleConstants BRModuleConstants =
+          new SwerveDriveConfigurator.SwerveDriveModuleConstants(FLModuleConstants,
+              SwerveDriveConfigurator.SwerveModuleCornerPosition.BACK_RIGHT, 0, 0, 0, 0);
+
+      SwerveDriveConfigurator.SwerveDriveRobotConstants robotConstants =
+          new SwerveDriveConfigurator.SwerveDriveRobotConstants(Pounds.of(75), Inches.of(25),
+              Inches.of(20), Inches.of(2), 0);
+
+      swerveDriveConfigurator = new SwerveDriveConfigurator(robotConstants,
+          new SwerveDriveConfigurator.SwerveDriveModuleConstants[] {FLModuleConstants,
+              FRModuleConstants, BLModuleConstants, BRModuleConstants});
+
       // TODO change this to not assume square drivebase
       m_swerveDrive = new SwerveDrive(new GyroIOSim(swerveDriveSimulation.getGyroSimulation()),
-          new ModuleIOSim(swerveDriveSimulation.getModules()[0], "Front Left",
-              new Translation2d(-k_driveBaseLengthMeters / 2, k_driveBaseLengthMeters / 2)),
-          new ModuleIOSim(swerveDriveSimulation.getModules()[1], "Front Right",
-              new Translation2d(k_driveBaseLengthMeters / 2, k_driveBaseLengthMeters / 2)),
-          new ModuleIOSim(swerveDriveSimulation.getModules()[2], "Back Left",
-              new Translation2d(-k_driveBaseLengthMeters / 2, -k_driveBaseLengthMeters / 2)),
-          new ModuleIOSim(swerveDriveSimulation.getModules()[3], "Back Right",
-              new Translation2d(k_driveBaseLengthMeters / 2, -k_driveBaseLengthMeters / 2)));
+          new ModuleIOSim(swerveDriveSimulation.getModules()[0],
+              SwerveDriveConfigurator.SwerveModuleCornerPosition.FRONT_LEFT,
+              swerveDriveConfigurator), new ModuleIOSim(swerveDriveSimulation.getModules()[1],
+          SwerveDriveConfigurator.SwerveModuleCornerPosition.FRONT_RIGHT, swerveDriveConfigurator),
+          new ModuleIOSim(swerveDriveSimulation.getModules()[2],
+              SwerveDriveConfigurator.SwerveModuleCornerPosition.BACK_LEFT,
+              swerveDriveConfigurator), new ModuleIOSim(swerveDriveSimulation.getModules()[3],
+          SwerveDriveConfigurator.SwerveModuleCornerPosition.BACK_RIGHT, swerveDriveConfigurator));
 
       SimulatedArena.getInstance().addDriveTrainSimulation(swerveDriveSimulation);
       controller = new DualShock4Controller(Constants.OperatorConstants.kDriverControllerPort);
@@ -157,6 +185,7 @@ public class RobotContainer {
    */
 
   private void configureBindings() {
+    controller.zero().onTrue(Commands.runOnce(this::zeroHeading));
   }
 
   /**
