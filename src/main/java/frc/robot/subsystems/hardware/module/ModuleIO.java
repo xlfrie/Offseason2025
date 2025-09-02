@@ -2,6 +2,7 @@ package frc.robot.subsystems.hardware.module;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Angle;
@@ -10,7 +11,6 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import org.dyn4j.geometry.Vector2;
 
 public interface ModuleIO {
   /**
@@ -97,10 +97,10 @@ public interface ModuleIO {
   String getModuleName();
 
   /**
-   * @return Vector that when set as the desired state for this module will rotate the
-   * robot without translation at 1 rad / sec
+   * @return Vector that when set as the desired state for this module will rotate the robot without
+   * translation at 1 rad / sec
    */
-  Vector2 getUnitRotationVec();
+  Translation2d getUnitRotationVec();
 
   default void telemetryHook(SendableBuilder sendableBuilder) {
 

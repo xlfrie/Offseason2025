@@ -32,7 +32,6 @@ public final class Constants {
     public static final Distance kDriveBaseLength = Inches.of(20);
 
     public static final Distance k_wheelRadius = Inches.of(2);
-    public static final Distance k_wheelCircumference = k_wheelRadius.times(2 * Math.PI);
   }
 
 
@@ -53,7 +52,7 @@ public final class Constants {
     public static final int kFLCANCoderID = 34;
     public static final int kBLCANCoderID = 32;
     public static final int kBRCANCoderID = 31;
-
+    //
     // TODO figure out if this is correct
     public static final boolean kDriveReversed = false;
     public static final boolean kAzimuthReversed = true;

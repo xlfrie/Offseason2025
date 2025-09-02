@@ -1,6 +1,8 @@
 package frc.robot.subsystems.hardware.module;
 
-import com.ctre.phoenix6.configs.*;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -11,6 +13,7 @@ import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Angle;
@@ -19,63 +22,52 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.RobotController;
-import frc.robot.Constants;
-import org.dyn4j.geometry.Vector2;
+import frc.robot.subsystems.SwerveDrive.SwerveDriveConfigurator;
 
 import static edu.wpi.first.units.Units.*;
-import static frc.robot.Constants.PhysicalRobotConstants.k_wheelCircumference;
 
 public class ModuleIOReal implements ModuleIO {
+  private final SwerveDriveConfigurator.SwerveDriveRobotConstants robotConstants;
+  private final SwerveDriveConfigurator.SwerveDriveModuleConstants moduleConstants;
+
+  private final String moduleName;
+
   private final TalonFX driveMotorController;
   private final SparkMax steerMotorController;
   private final CANcoder CANCoder;
 
-  private final Angle CANCoderOffset;
-
   // TODO this might be better of as a profiled PID controller
   private final PIDController steerPIDController;
 
-  private final int steerVoltageCoefficient =
-      Constants.RealRobotConstants.kAzimuthReversed ? -1 : 1;
+  private final int steerVoltageCoefficient;
 
   private final VelocityVoltage driveVelocityVoltage;
-
-  private final int driveMotorID;
-  private final int steerMotorID;
-  private final int CANCoderID;
 
   private final SwerveModulePosition swerveModulePosition;
   private final SwerveModuleState desiredState;
   private final SwerveModuleState currentState;
 
-  private final String moduleName;
-  private final Vector2 unitRotationVec;
-
-  // TODO move to constants
-  private static final double driveGearRatio = 1 / 6.12;
+  private final Translation2d unitRotationVec;
 
   // TODO Document this
-  public ModuleIOReal(int driveMotorID, int steerMotorID, int CANCoderID, Angle CANCoderOffset,
-      Vector2 physicalModulePosition, String moduleName) {
+  public ModuleIOReal(SwerveDriveConfigurator.SwerveModuleCornerPosition cornerPosition,
+      SwerveDriveConfigurator swerveDriveConfigurator) {
+    this.robotConstants = swerveDriveConfigurator.swerveDriveRobotConstants;
+    this.moduleConstants = swerveDriveConfigurator.getModuleConstants(cornerPosition);
 
-    this.driveMotorID = driveMotorID;
-    this.steerMotorID = steerMotorID;
-    this.CANCoderID = CANCoderID;
-    this.CANCoderOffset = CANCoderOffset;
-    this.moduleName = moduleName;
-
+    moduleName = moduleConstants.getModuleName();
 
     // Drive motor config
-    driveMotorController = new TalonFX(this.driveMotorID, "rio");
+    driveMotorController = new TalonFX(moduleConstants.driveMotorID, "rio");
 
     TalonFXConfigurator driveMotorConfigurator = driveMotorController.getConfigurator();
 
     Slot0Configs slot0Configs = new Slot0Configs();
-    slot0Configs.kP = Constants.RealRobotConstants.kPDrive;
-    slot0Configs.kI = Constants.RealRobotConstants.kIDrive;
-    slot0Configs.kD = Constants.RealRobotConstants.kDDrive;
-    slot0Configs.kV = Constants.RealRobotConstants.kVDrive;
-    slot0Configs.kS = Constants.RealRobotConstants.kSDrive;
+    slot0Configs.kP = moduleConstants.kPDrive;
+    slot0Configs.kI = moduleConstants.kIDrive;
+    slot0Configs.kD = moduleConstants.kDDrive;
+    slot0Configs.kV = moduleConstants.kVDrive;
+    slot0Configs.kS = moduleConstants.kSDrive;
     driveMotorConfigurator.apply(slot0Configs);
     // TODO verify falcon is ccw+
     // driveMotorConfigurator.apply(new MotorOutputConfigs().withInverted(
@@ -87,28 +79,32 @@ public class ModuleIOReal implements ModuleIO {
     driveVelocityVoltage.Slot = 0;
 
     // Azimuth motor config
-    steerMotorController = new SparkMax(this.steerMotorID, SparkMax.MotorType.kBrushless);
+    steerVoltageCoefficient = moduleConstants.azimuthReversed ? -1 : 1;
+
+    steerMotorController =
+        new SparkMax(moduleConstants.azimuthMotorID, SparkMax.MotorType.kBrushless);
     SparkMaxConfig sparkMaxConfig = new SparkMaxConfig();
     // TODO figure out this open loop ramp rate
     sparkMaxConfig.smartCurrentLimit(40).idleMode(SparkBaseConfig.IdleMode.kBrake)
         .openLoopRampRate(0.2);
 
-    steerMotorController.configure(sparkMaxConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters);
+    steerMotorController.configure(sparkMaxConfig, SparkBase.ResetMode.kResetSafeParameters,
+        SparkBase.PersistMode.kPersistParameters);
 
 
-    steerPIDController = new PIDController(Constants.RealRobotConstants.kPAzimuth,
-        Constants.RealRobotConstants.kIAzimuth, Constants.RealRobotConstants.kDAzimuth);
+    steerPIDController = new PIDController(moduleConstants.kPAzimuth, moduleConstants.kIAzimuth,
+        moduleConstants.kDAzimuth);
     steerPIDController.enableContinuousInput(-Math.PI, Math.PI);
     steerPIDController.setTolerance(0.05);
 
     // CANCoder config
-    CANCoder = new CANcoder(this.CANCoderID, "rio");
+    CANCoder = new CANcoder(moduleConstants.CANCoderID, "rio");
 
     CANcoderConfiguration configuration = new CANcoderConfiguration();
     configuration.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
     // TODO determine if this is correct
     configuration.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.5;
-    configuration.MagnetSensor.MagnetOffset = -this.CANCoderOffset.in(Rotations);
+    configuration.MagnetSensor.MagnetOffset = -moduleConstants.CANCoderOffset;
 
     CANCoder.getConfigurator().apply(configuration);
 
@@ -118,8 +114,7 @@ public class ModuleIOReal implements ModuleIO {
     currentState = new SwerveModuleState(0, new Rotation2d());
 
     // Explanation for this is in sim implementation
-    this.unitRotationVec = physicalModulePosition.copy().rotate(Math.PI / 2).getNormalized()
-        .multiply(physicalModulePosition.getMagnitude());
+    this.unitRotationVec = moduleConstants.physicalModulePosition.rotateBy(Rotation2d.kCCW_90deg);
 
     telemetry();
   }
@@ -131,13 +126,13 @@ public class ModuleIOReal implements ModuleIO {
 
   @Override
   public AngularVelocity getDriveWheelVelocity() {
-    return driveMotorController.getVelocity().getValue().times(driveGearRatio);
+    return driveMotorController.getVelocity().getValue().times(moduleConstants.driveGearRatio);
   }
 
   @Override
   public Angle getDriveWheelPosition() {
     // TODO Ensure this math is correct
-    return driveMotorController.getPosition().getValue().times(driveGearRatio);
+    return driveMotorController.getPosition().getValue().times(moduleConstants.driveGearRatio);
   }
 
   @Override
@@ -178,7 +173,7 @@ public class ModuleIOReal implements ModuleIO {
     currentState.angle = this.getSteerAngle();
 
     currentState.speedMetersPerSecond = driveMotorController.getVelocity().getValue()
-        .in(RadiansPerSecond) * k_wheelCircumference.in(Meters);
+        .in(RadiansPerSecond) * robotConstants.wheelCircumference.in(Meters);
 
     return currentState;
   }
@@ -188,7 +183,7 @@ public class ModuleIOReal implements ModuleIO {
     swerveModulePosition.angle = this.getSteerAngle();
     swerveModulePosition.distanceMeters =
         Rotations.ofBaseUnits(this.getDriveWheelPosition().baseUnitMagnitude())
-            .magnitude() * k_wheelCircumference.magnitude() * driveGearRatio;
+            .magnitude() * robotConstants.wheelCircumference.magnitude() * moduleConstants.driveGearRatio;
     return this.swerveModulePosition;
   }
 
@@ -202,7 +197,8 @@ public class ModuleIOReal implements ModuleIO {
     if (angle != null)
       this.desiredState.angle = angle;
 
-    setDrivePID(speed.in(MetersPerSecond) / k_wheelCircumference.in(Meters) / driveGearRatio);
+    setDrivePID(speed.in(MetersPerSecond) / robotConstants.wheelCircumference.in(
+        Meters) / moduleConstants.driveGearRatio);
 
     setSteerPID(desiredState.angle.getRadians());
   }
@@ -219,7 +215,7 @@ public class ModuleIOReal implements ModuleIO {
   }
 
   @Override
-  public Vector2 getUnitRotationVec() {
+  public Translation2d getUnitRotationVec() {
     return unitRotationVec;
   }
 
@@ -228,6 +224,7 @@ public class ModuleIOReal implements ModuleIO {
     sendableBuilder.addDoubleProperty(moduleName + "-azimuthError",
         () -> steerPIDController.getError(), null);
     sendableBuilder.addDoubleProperty(moduleName + "-driveError",
-        () -> driveMotorController.getVelocity().getValueAsDouble() - driveVelocityVoltage.Velocity, null);
+        () -> driveMotorController.getVelocity().getValueAsDouble() - driveVelocityVoltage.Velocity,
+        null);
   }
 }

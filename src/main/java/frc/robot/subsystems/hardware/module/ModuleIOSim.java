@@ -3,6 +3,7 @@ package frc.robot.subsystems.hardware.module;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.Units;
@@ -29,12 +30,12 @@ public class ModuleIOSim implements ModuleIO {
   private final SwerveModuleState desiredState;
 
   private final String moduleName;
-  private final Vector2 unitRotationVec;
+  private final Translation2d unitRotationVec;
 
   private final Distance simulatedCircumference;
 
   public ModuleIOSim(SwerveModuleSimulation swerveModuleSimulation, String moduleName,
-      Vector2 physicalPosition) {
+      Translation2d physicalPosition) {
     this.swerveModuleSimulation = swerveModuleSimulation;
 
     this.swerveModulePosition = new SwerveModulePosition();
@@ -60,11 +61,9 @@ public class ModuleIOSim implements ModuleIO {
 
     // This unit is 1 rad / sec
     // Proof: assume the wheel moves along a circle about the robot center. Length of an arc is
-    // radius times angle in radians so the length of the arc is the distance of the module to
+    // radius times angle in radians, so the length of the arc is the distance of the module to
     // the center times one radian 
-    this.unitRotationVec = physicalPosition.copy().rotate(Math.PI / 2).getNormalized()
-        .multiply(physicalPosition.getMagnitude());
-
+    this.unitRotationVec = physicalPosition.rotateBy(Rotation2d.kCCW_90deg);
     this.desiredState = new SwerveModuleState(0, new Rotation2d());
 
     this.simulatedCircumference = swerveModuleSimulation.config.WHEEL_RADIUS.times(2 * Math.PI);
@@ -165,7 +164,7 @@ public class ModuleIOSim implements ModuleIO {
   }
 
   @Override
-  public Vector2 getUnitRotationVec() {
+  public Translation2d getUnitRotationVec() {
     return unitRotationVec;
   }
 

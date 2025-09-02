@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.SwerveDrive.DefaultJoystickCommand;
 import frc.robot.subsystems.SwerveDrive.SwerveDrive;
+import frc.robot.subsystems.SwerveDrive.SwerveDriveConfigurator;
 import frc.robot.subsystems.hardware.gyroscope.GyroIOPigeon2;
 import frc.robot.subsystems.hardware.gyroscope.GyroIOSim;
 import frc.robot.subsystems.hardware.module.ModuleIOReal;
@@ -31,7 +32,6 @@ import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 
 import static edu.wpi.first.units.Units.*;
-import static frc.robot.Constants.PhysicalRobotConstants.kDriveBaseLength;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -43,11 +43,13 @@ public class RobotContainer {
   private SwerveDrive m_swerveDrive;
   private Controller controller;
 
+  private SwerveDriveConfigurator swerveDriveConfigurator;
+
   public static SwerveDriveSimulation swerveDriveSimulation;
 
   public static VisionIO visionIO;
 
-  private static final double k_driveBaseLengthMeters = kDriveBaseLength.in(Meters);
+  private static final double k_driveBaseLengthMeters = Inches.of(20).in(Meters);
 
   public static final SwerveDriveKinematics swerveDriveKinematics = new SwerveDriveKinematics(
       new Translation2d(-k_driveBaseLengthMeters / 2, -k_driveBaseLengthMeters / 2),
@@ -61,28 +63,57 @@ public class RobotContainer {
   public RobotContainer() {
     if (Robot.isReal()) {
       // Real drive train
-      m_swerveDrive = new SwerveDrive(new GyroIOPigeon2(Constants.RealRobotConstants.kPigeon2ID),
-          new ModuleIOReal(Constants.RealRobotConstants.kFLDriveMotorID,
-              Constants.RealRobotConstants.kFLAzimuthMotorID,
+      SwerveDriveConfigurator.SwerveDriveModuleConstants FLModuleConstants =
+          new SwerveDriveConfigurator.SwerveDriveModuleConstants(
+              SwerveDriveConfigurator.SwerveModuleCornerPosition.FRONT_LEFT,
               Constants.RealRobotConstants.kFLCANCoderID,
-              Radians.of(Constants.RealRobotConstants.kFLCANCoderOffset),
-              new Vector2(-k_driveBaseLengthMeters / 2, k_driveBaseLengthMeters / 2), "Front Left"),
-          new ModuleIOReal(Constants.RealRobotConstants.kFRDriveMotorID,
-              Constants.RealRobotConstants.kFRAzimuthMotorID,
+              Constants.RealRobotConstants.kFLDriveMotorID,
+              Constants.RealRobotConstants.kFLAzimuthMotorID,
+              Constants.RealRobotConstants.kFLCANCoderOffset, Constants.RealRobotConstants.kPDrive,
+              Constants.RealRobotConstants.kIDrive, Constants.RealRobotConstants.kDDrive,
+              Constants.RealRobotConstants.kSDrive, Constants.RealRobotConstants.kVDrive,
+              Constants.RealRobotConstants.kPAzimuth, Constants.RealRobotConstants.kIAzimuth,
+              Constants.RealRobotConstants.kDAzimuth, 0, 2, true, 1 / 6.2);
+      SwerveDriveConfigurator.SwerveDriveModuleConstants FRModuleConstants =
+          new SwerveDriveConfigurator.SwerveDriveModuleConstants(FLModuleConstants,
+              SwerveDriveConfigurator.SwerveModuleCornerPosition.FRONT_RIGHT,
               Constants.RealRobotConstants.kFRCANCoderID,
-              Radians.of(Constants.RealRobotConstants.kFRCANCoderOffset),
-              new Vector2(k_driveBaseLengthMeters / 2, k_driveBaseLengthMeters / 2), "Front Right"),
-          new ModuleIOReal(Constants.RealRobotConstants.kBLDriveMotorID,
-              Constants.RealRobotConstants.kBLAzimuthMotorID,
+              Constants.RealRobotConstants.kFRDriveMotorID,
+              Constants.RealRobotConstants.kFRAzimuthMotorID,
+              Constants.RealRobotConstants.kFRCANCoderOffset);
+      SwerveDriveConfigurator.SwerveDriveModuleConstants BLModuleConstants =
+          new SwerveDriveConfigurator.SwerveDriveModuleConstants(FLModuleConstants,
+              SwerveDriveConfigurator.SwerveModuleCornerPosition.BACK_LEFT,
               Constants.RealRobotConstants.kBLCANCoderID,
-              Radians.of(Constants.RealRobotConstants.kBLCANCoderOffset),
-              new Vector2(-k_driveBaseLengthMeters / 2, -k_driveBaseLengthMeters / 2), "Back Left"),
-          new ModuleIOReal(Constants.RealRobotConstants.kBRDriveMotorID,
-              Constants.RealRobotConstants.kBRAzimuthMotorID,
+              Constants.RealRobotConstants.kBLDriveMotorID,
+              Constants.RealRobotConstants.kBLAzimuthMotorID,
+              Constants.RealRobotConstants.kBLCANCoderOffset);
+      SwerveDriveConfigurator.SwerveDriveModuleConstants BRModuleConstants =
+          new SwerveDriveConfigurator.SwerveDriveModuleConstants(FLModuleConstants,
+              SwerveDriveConfigurator.SwerveModuleCornerPosition.BACK_RIGHT,
               Constants.RealRobotConstants.kBRCANCoderID,
-              Radians.of(Constants.RealRobotConstants.kBRCANCoderOffset),
-              new Vector2(k_driveBaseLengthMeters / 2, -k_driveBaseLengthMeters / 2),
-              "Back Right"));
+              Constants.RealRobotConstants.kBRDriveMotorID,
+              Constants.RealRobotConstants.kBRAzimuthMotorID,
+              Constants.RealRobotConstants.kBRCANCoderOffset);
+
+      SwerveDriveConfigurator.SwerveDriveRobotConstants robotConstants =
+          new SwerveDriveConfigurator.SwerveDriveRobotConstants(Kilograms.of(35), Inches.of(25),
+              Inches.of(20), Inches.of(2), Constants.RealRobotConstants.kPigeon2ID);
+
+      swerveDriveConfigurator = new SwerveDriveConfigurator(robotConstants,
+          new SwerveDriveConfigurator.SwerveDriveModuleConstants[] {FLModuleConstants,
+              FRModuleConstants, BLModuleConstants, BRModuleConstants});
+
+      m_swerveDrive = new SwerveDrive(new GyroIOPigeon2(robotConstants.pigeonID),
+          new ModuleIOReal(SwerveDriveConfigurator.SwerveModuleCornerPosition.FRONT_LEFT,
+              swerveDriveConfigurator),
+          new ModuleIOReal(SwerveDriveConfigurator.SwerveModuleCornerPosition.FRONT_RIGHT,
+              swerveDriveConfigurator),
+          new ModuleIOReal(SwerveDriveConfigurator.SwerveModuleCornerPosition.BACK_LEFT,
+              swerveDriveConfigurator),
+          new ModuleIOReal(SwerveDriveConfigurator.SwerveModuleCornerPosition.BACK_RIGHT,
+              swerveDriveConfigurator));
+
       controller = new DualShock4Controller(Constants.OperatorConstants.kDriverControllerPort);
     } else {
       visionIO = new VisionIOSim();
@@ -95,20 +126,19 @@ public class RobotContainer {
               .withRobotMass(Units.Pound.of(75)).withSwerveModule(
                   COTS.ofMark4i(DCMotor.getFalcon500(1), DCMotor.getNEO(1),
                       COTS.WHEELS.DEFAULT_NEOPRENE_TREAD.cof, 3))
-              .withTrackLengthTrackWidth(kDriveBaseLength, kDriveBaseLength)
-              .withBumperSize(Inches.of(31), Inches.of(31)),
-          new Pose2d(2, 7, Rotation2d.kZero));
+              .withTrackLengthTrackWidth(Inches.of(20), Inches.of(20))
+              .withBumperSize(Inches.of(31), Inches.of(31)), new Pose2d(2, 7, Rotation2d.kZero));
 
       // TODO change this to not assume square drivebase
       m_swerveDrive = new SwerveDrive(new GyroIOSim(swerveDriveSimulation.getGyroSimulation()),
           new ModuleIOSim(swerveDriveSimulation.getModules()[0], "Front Left",
-              new Vector2(-k_driveBaseLengthMeters / 2, k_driveBaseLengthMeters / 2)),
+              new Translation2d(-k_driveBaseLengthMeters / 2, k_driveBaseLengthMeters / 2)),
           new ModuleIOSim(swerveDriveSimulation.getModules()[1], "Front Right",
-              new Vector2(k_driveBaseLengthMeters / 2, k_driveBaseLengthMeters / 2)),
+              new Translation2d(k_driveBaseLengthMeters / 2, k_driveBaseLengthMeters / 2)),
           new ModuleIOSim(swerveDriveSimulation.getModules()[2], "Back Left",
-              new Vector2(-k_driveBaseLengthMeters / 2, -k_driveBaseLengthMeters / 2)),
+              new Translation2d(-k_driveBaseLengthMeters / 2, -k_driveBaseLengthMeters / 2)),
           new ModuleIOSim(swerveDriveSimulation.getModules()[3], "Back Right",
-              new Vector2(k_driveBaseLengthMeters / 2, -k_driveBaseLengthMeters / 2)));
+              new Translation2d(k_driveBaseLengthMeters / 2, -k_driveBaseLengthMeters / 2)));
 
       SimulatedArena.getInstance().addDriveTrainSimulation(swerveDriveSimulation);
       controller = new DualShock4Controller(Constants.OperatorConstants.kDriverControllerPort);

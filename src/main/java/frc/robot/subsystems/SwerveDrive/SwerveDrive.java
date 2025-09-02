@@ -7,6 +7,7 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -142,12 +143,12 @@ public class SwerveDrive extends SubsystemBase {
   private void calculateState(ChassisSpeeds chassisSpeeds, double heading, ModuleIO module,
       boolean absolute) {
     // VY is the desired left velocity, vx is the desired forward velocity
-    Vector2 translationVector =
-        new Vector2(-chassisSpeeds.vyMetersPerSecond, chassisSpeeds.vxMetersPerSecond);
+    Translation2d translationVector =
+        new Translation2d(-chassisSpeeds.vyMetersPerSecond, chassisSpeeds.vxMetersPerSecond);
 
     // Accounts for heading in absolute movement, this is all the absolute flag does
     if (absolute)
-      translationVector.rotate(-heading);
+      translationVector.rotateBy(Rotation2d.fromRadians(-heading));
 
 
     /*
@@ -163,16 +164,15 @@ public class SwerveDrive extends SubsystemBase {
 
 
     // Calculates rotation vector as described
-    Vector2 rotationVector = module.getUnitRotationVec().copy()
-        .multiply(chassisSpeeds.omegaRadiansPerSecond * 1 * Math.PI);
+    Translation2d rotationVector = module.getUnitRotationVec().times(chassisSpeeds.omegaRadiansPerSecond * 1 * Math.PI);
 
     // This will be the desired state
-    translationVector.add(rotationVector);
+    translationVector.plus(rotationVector);
 
     // Gets the angle of the vector, 90 degrees is subtracted from the calculated angle because 
     // heading angle's zero is set 90 degrees counterclockwise
-    Angle vecAngle = Radians.of(translationVector.getDirection() - Math.PI / 2);
-    double vecMagnitude = translationVector.getMagnitude();
+    Angle vecAngle = translationVector.getAngle().getMeasure().minus(Radians.of(Math.PI / 2));
+    double vecMagnitude = translationVector.getDistance(Translation2d.kZero);
 
     // Current angle that wheel is facing.
     Angle steeringAngle = module.getSteerAngle().getMeasure();
