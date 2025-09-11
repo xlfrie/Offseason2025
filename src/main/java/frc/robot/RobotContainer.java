@@ -73,7 +73,7 @@ public class RobotContainer {
               Constants.RealRobotConstants.kIDrive, Constants.RealRobotConstants.kDDrive,
               Constants.RealRobotConstants.kSDrive, Constants.RealRobotConstants.kVDrive,
               Constants.RealRobotConstants.kPAzimuth, Constants.RealRobotConstants.kIAzimuth,
-              Constants.RealRobotConstants.kDAzimuth, 0, 2, true, 1 / 6.2);
+              Constants.RealRobotConstants.kDAzimuth, 0, 2, false, 1 / 6.2);
       SwerveDriveConfigurator.SwerveDriveModuleConstants FRModuleConstants =
           new SwerveDriveConfigurator.SwerveDriveModuleConstants(FLModuleConstants,
               SwerveDriveConfigurator.SwerveModuleCornerPosition.FRONT_RIGHT,
@@ -124,8 +124,8 @@ public class RobotContainer {
       swerveDriveSimulation = new SwerveDriveSimulation(
           DriveTrainSimulationConfig.Default().withGyro(COTS.ofPigeon2())
               .withRobotMass(Units.Pound.of(75)).withSwerveModule(
-                  COTS.ofMark4i(DCMotor.getFalcon500(1), DCMotor.getNEO(1),
-                      COTS.WHEELS.DEFAULT_NEOPRENE_TREAD.cof, 3))
+                  COTS.ofSwerveX2(DCMotor.getKrakenX60(1), DCMotor.getNEO(1),
+                      COTS.WHEELS.SLS_PRINTED_WHEELS.cof, 3))
               .withTrackLengthTrackWidth(Inches.of(20), Inches.of(20))
               .withBumperSize(Inches.of(31), Inches.of(31)), new Pose2d(2, 7, Rotation2d.kZero));
 
@@ -138,7 +138,7 @@ public class RobotContainer {
               Constants.SimulatedControlSystemConstants.kVDrive,
               Constants.SimulatedControlSystemConstants.kPSteer,
               Constants.SimulatedControlSystemConstants.kISteer,
-              Constants.SimulatedControlSystemConstants.kDSteer, 0, 2, true, 1 / 6.12);
+              Constants.SimulatedControlSystemConstants.kDSteer, 0, 2, false, 1 / 6.2);
       SwerveDriveConfigurator.SwerveDriveModuleConstants FRModuleConstants =
           new SwerveDriveConfigurator.SwerveDriveModuleConstants(FLModuleConstants,
               SwerveDriveConfigurator.SwerveModuleCornerPosition.FRONT_RIGHT, 0, 0, 0, 0);

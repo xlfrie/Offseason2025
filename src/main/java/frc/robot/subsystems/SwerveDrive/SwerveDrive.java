@@ -141,21 +141,6 @@ public class SwerveDrive extends SubsystemBase {
   // TODO add skew compensation constant
   private void calculateState(ChassisSpeeds chassisSpeeds, double heading, ModuleIO module,
       boolean absolute) {
-    // Early clear state
-    if (chassisSpeeds.vxMetersPerSecond == 0 && chassisSpeeds.vyMetersPerSecond == 0) {
-      module.setDesiredState(MetersPerSecond.zero(), null);
-      return;
-    }
-
-    // VY is the desired left velocity, vx is the desired forward velocity
-    Translation2d translationVector =
-        new Translation2d(-chassisSpeeds.vyMetersPerSecond, chassisSpeeds.vxMetersPerSecond);
-
-    // Accounts for heading in absolute movement, this is all the absolute flag does
-    if (absolute)
-      translationVector = translationVector.rotateBy(Rotation2d.fromRadians(-heading));
-
-
     /*
       Swerve drive kinematics are fairly simple.
       There are two components to each module's desired state.
@@ -167,18 +152,33 @@ public class SwerveDrive extends SubsystemBase {
       The desired state is the sum of the two.
      */
 
+	  Translation2d moduleVector;
 
     // Calculates rotation vector as described
     Translation2d rotationVector =
         module.getUnitRotationVec().times(chassisSpeeds.omegaRadiansPerSecond * 1 * Math.PI);
 
+	  // VY is the desired left velocity, vx is the desired forward velocity
+	  Translation2d translationVector =
+			  new Translation2d(-chassisSpeeds.vyMetersPerSecond, chassisSpeeds.vxMetersPerSecond);
+
+	  // Early clear state
+	  if (rotationVector.getX() == 0 && rotationVector.getY() == 0 && translationVector.getX() == 0 && translationVector.getY() == 0) {
+		  module.setDesiredState(MetersPerSecond.zero(), null);
+		  return;
+	  }
+
+	  // Accounts for heading in absolute movement, this is all the absolute flag does
+	  if (absolute)
+		  translationVector = translationVector.rotateBy(Rotation2d.fromRadians(-heading));
+
     // This will be the desired state
-    translationVector = translationVector.plus(rotationVector);
+	  moduleVector = translationVector.plus(rotationVector);
 
     // Gets the angle of the vector, 90 degrees is subtracted from the calculated angle because 
     // heading angle's zero is set 90 degrees counterclockwise
-    Angle vecAngle = translationVector.getAngle().getMeasure().minus(Radians.of(Math.PI / 2));
-    double vecMagnitude = translationVector.getDistance(Translation2d.kZero);
+	  Angle vecAngle = moduleVector.getAngle().getMeasure().minus(Radians.of(Math.PI / 2));
+	  double vecMagnitude = moduleVector.getDistance(Translation2d.kZero);
 
     // Current angle that wheel is facing.
     Angle steeringAngle = module.getSteerAngle().getMeasure();
@@ -244,8 +244,6 @@ public class SwerveDrive extends SubsystemBase {
 
   public void initTelemetry() {
     SmartDashboard.putData("SwerveDriveTelemetry", (builder) -> {
-      builder.addDoubleProperty("velocity",
-          () -> RobotContainer.swerveDriveSimulation.getLinearVelocity().getMagnitude(), null);
       builder.setSmartDashboardType("SwerveDriveTelemetry");
     });
   }
