@@ -1,6 +1,7 @@
 package frc.robot.subsystems.hardware.module;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.VelocityVoltage;
@@ -69,6 +70,9 @@ public class ModuleIOReal implements ModuleIO {
     slot0Configs.kV = moduleConstants.kVDrive;
     slot0Configs.kS = moduleConstants.kSDrive;
     driveMotorConfigurator.apply(slot0Configs);
+	  driveMotorConfigurator.apply(
+			  new CurrentLimitsConfigs().withStatorCurrentLimitEnable(true).withStatorCurrentLimit(100)
+					  .withSupplyCurrentLimit(60).withSupplyCurrentLimitEnable(true).withSupplyCurrentLowerLimit(40));
     // TODO verify falcon is ccw+
     // driveMotorConfigurator.apply(new MotorOutputConfigs().withInverted(
     //     Constants.RealRobotConstants.kDriveReversed ?
