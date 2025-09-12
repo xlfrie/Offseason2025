@@ -73,7 +73,7 @@ public class RobotContainer {
               Constants.RealRobotConstants.kIDrive, Constants.RealRobotConstants.kDDrive,
               Constants.RealRobotConstants.kSDrive, Constants.RealRobotConstants.kVDrive,
               Constants.RealRobotConstants.kPAzimuth, Constants.RealRobotConstants.kIAzimuth,
-              Constants.RealRobotConstants.kDAzimuth, 0, 2, false, 1 / 6.2);
+              Constants.RealRobotConstants.kDAzimuth, 0, 3, false, 1 / 6.2);
       SwerveDriveConfigurator.SwerveDriveModuleConstants FRModuleConstants =
           new SwerveDriveConfigurator.SwerveDriveModuleConstants(FLModuleConstants,
               SwerveDriveConfigurator.SwerveModuleCornerPosition.FRONT_RIGHT,
@@ -125,7 +125,7 @@ public class RobotContainer {
           DriveTrainSimulationConfig.Default().withGyro(COTS.ofPigeon2())
               .withRobotMass(Units.Pound.of(75)).withSwerveModule(
                   COTS.ofSwerveX2(DCMotor.getKrakenX60(1), DCMotor.getNEO(1),
-                      COTS.WHEELS.SLS_PRINTED_WHEELS.cof, 3))
+                      COTS.WHEELS.SLS_PRINTED_WHEELS.cof, 3, 11))
               .withTrackLengthTrackWidth(Inches.of(20), Inches.of(20))
               .withBumperSize(Inches.of(31), Inches.of(31)), new Pose2d(2, 7, Rotation2d.kZero));
 

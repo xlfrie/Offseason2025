@@ -2,11 +2,13 @@ package frc.robot.subsystems.hardware.module;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkMax;
@@ -71,8 +73,9 @@ public class ModuleIOReal implements ModuleIO {
     slot0Configs.kS = moduleConstants.kSDrive;
     driveMotorConfigurator.apply(slot0Configs);
 	  driveMotorConfigurator.apply(
-			  new CurrentLimitsConfigs().withStatorCurrentLimitEnable(true).withStatorCurrentLimit(100)
+			  new CurrentLimitsConfigs().withStatorCurrentLimitEnable(true).withStatorCurrentLimit(80)
 					  .withSupplyCurrentLimit(60).withSupplyCurrentLimitEnable(true).withSupplyCurrentLowerLimit(40));
+            driveMotorConfigurator.apply(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
     // TODO verify falcon is ccw+
     // driveMotorConfigurator.apply(new MotorOutputConfigs().withInverted(
     //     Constants.RealRobotConstants.kDriveReversed ?
