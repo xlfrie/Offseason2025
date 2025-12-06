@@ -117,7 +117,9 @@ public class SwerveDrive extends SubsystemBase {
     swerveDrivePoseEstimator.update(gyro.getRotation(), getModulePositions());
 
     publishTelemetry();
+  }
 
+  public void tickPid() {
     // Some PIDs need to be calculated, do that here
     frontRight.tickPID();
     frontLeft.tickPID();
@@ -247,4 +249,9 @@ public class SwerveDrive extends SubsystemBase {
       builder.setSmartDashboardType("SwerveDriveTelemetry");
     });
   }
+
+  public ModuleIO[] getModules() {
+    return new ModuleIO[] {frontLeft, frontRight, backLeft, backRight};
+  }
+
 }

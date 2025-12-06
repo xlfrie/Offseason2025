@@ -51,6 +51,8 @@ public class DefaultJoystickCommand extends Command {
             -applyDeadband(rx.getAsDouble())*2);
 
     drive.drive(chassisSpeeds, true);
+
+    drive.tickPid();
   }
 
   /**

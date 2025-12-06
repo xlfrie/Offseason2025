@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.SwerveDrive.DefaultJoystickCommand;
+import frc.robot.commands.SwerveDrive.SysIDCommand;
 import frc.robot.subsystems.SwerveDrive.SwerveDrive;
 import frc.robot.subsystems.SwerveDrive.SwerveDriveConfigurator;
 import frc.robot.subsystems.hardware.gyroscope.GyroIOPigeon2;
@@ -125,7 +126,7 @@ public class RobotContainer {
           DriveTrainSimulationConfig.Default().withGyro(COTS.ofPigeon2())
               .withRobotMass(Units.Pound.of(75)).withSwerveModule(
                   COTS.ofSwerveX2(DCMotor.getKrakenX60(1), DCMotor.getNEO(1),
-                      COTS.WHEELS.SLS_PRINTED_WHEELS.cof, 3, 11))
+                      COTS.WHEELS.SLS_PRINTED_WHEELS.cof, 2, 11))
               .withTrackLengthTrackWidth(Inches.of(20), Inches.of(20))
               .withBumperSize(Inches.of(31), Inches.of(31)), new Pose2d(2, 7, Rotation2d.kZero));
 
@@ -192,9 +193,10 @@ public class RobotContainer {
    * Sets the controller as the default movement command for swerve.
    */
   public void bindJoystickCommand() {
-    m_swerveDrive.setDefaultCommand(
-        new DefaultJoystickCommand(controller::getLeftX, controller::getLeftY,
-            controller::getRightX, m_swerveDrive));
+    // m_swerveDrive.setDefaultCommand(
+    //     new DefaultJoystickCommand(controller::getLeftX, controller::getLeftY,
+    //         controller::getRightX, m_swerveDrive));
+    m_swerveDrive.setDefaultCommand(new SysIDCommand(m_swerveDrive, SysIDCommand.Routine.DRIVE_VELOCITY_DYNAMIC, controller));
   }
 
   public void zeroHeading() {
