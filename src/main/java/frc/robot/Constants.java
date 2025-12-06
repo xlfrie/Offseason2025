@@ -63,11 +63,11 @@ public final class Constants {
     public static final double kBLCANCoderOffset = 0.09033203125;
     public static final double kBRCANCoderOffset = -0.07421875;
 
-    public static final double kPDrive = 0;
+    public static final double kPDrive = 0.098616;
     public static final double kIDrive = 0;
     public static final double kDDrive = 0;
-    public static final double kSDrive = 0;
-    public static final double kVDrive = 0.14;
+    public static final double kSDrive = 0.0058039;
+    public static final double kVDrive = 0.11504;
 
     public static final double kPAzimuth = 2;
     public static final double kIAzimuth = 0;

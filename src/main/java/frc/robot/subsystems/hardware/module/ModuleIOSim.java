@@ -182,4 +182,9 @@ public class ModuleIOSim implements ModuleIO {
         () -> RobotContainer.swerveDriveSimulation.getForce()
             .getMagnitude() / Constants.PhysicalRobotConstants.kMass.in(Kilogram), null);
   }
+
+  @Override
+  public AngularVelocity getSteerVelocity() {
+    return swerveModuleSimulation.getSteerRelativeEncoderVelocity();
+  }
 }

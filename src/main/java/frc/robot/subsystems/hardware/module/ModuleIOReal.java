@@ -157,7 +157,7 @@ public class ModuleIOReal implements ModuleIO {
   public Voltage getSteerVoltage() {
     // TODO look for better way of doing this
     // This may not be correct
-    return Volts.of(steerMotorController.get() * RobotController.getBatteryVoltage());
+    return Volts.of(steerMotorController.getAppliedOutput() * RobotController.getBatteryVoltage());
   }
 
   @Override
@@ -233,5 +233,10 @@ public class ModuleIOReal implements ModuleIO {
     sendableBuilder.addDoubleProperty(moduleName + "-driveError",
         () -> driveMotorController.getVelocity().getValueAsDouble() - driveVelocityVoltage.Velocity,
         null);
+  }
+
+  @Override
+  public AngularVelocity getSteerVelocity() {
+    return CANCoder.getVelocity().getValue();
   }
 }

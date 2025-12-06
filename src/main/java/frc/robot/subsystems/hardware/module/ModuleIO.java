@@ -38,6 +38,8 @@ public interface ModuleIO {
    */
   Voltage getSteerVoltage();
 
+  AngularVelocity getSteerVelocity();
+
   /**
    * @return The direction the wheel is facing
    */
