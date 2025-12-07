@@ -84,8 +84,8 @@ public final class Constants {
     public static final double kIDrive = 0;
     public static final double kDDrive = 0;
 
-    public static final double kPSteer = 28;
+    public static final double kPSteer = 13.26;
     public static final double kISteer = 0;
-    public static final double kDSteer = 0.5;
+    public static final double kDSteer = 0.59364;
   }
 }

@@ -185,6 +185,6 @@ public class ModuleIOSim implements ModuleIO {
 
   @Override
   public AngularVelocity getSteerVelocity() {
-    return swerveModuleSimulation.getSteerRelativeEncoderVelocity();
+    return swerveModuleSimulation.getSteerAbsoluteEncoderSpeed();
   }
 }
