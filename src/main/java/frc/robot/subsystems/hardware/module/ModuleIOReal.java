@@ -75,7 +75,7 @@ public class ModuleIOReal implements ModuleIO {
 	  driveMotorConfigurator.apply(
 			  new CurrentLimitsConfigs().withStatorCurrentLimitEnable(true).withStatorCurrentLimit(80)
 					  .withSupplyCurrentLimit(60).withSupplyCurrentLimitEnable(true).withSupplyCurrentLowerLimit(40));
-            driveMotorConfigurator.apply(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
+            driveMotorConfigurator.apply(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Coast));
     // TODO verify falcon is ccw+
     // driveMotorConfigurator.apply(new MotorOutputConfigs().withInverted(
     //     Constants.RealRobotConstants.kDriveReversed ?
