@@ -11,7 +11,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Units;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -41,10 +41,10 @@ import static edu.wpi.first.units.Units.*;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
-  private SwerveDrive m_swerveDrive;
-  private Controller controller;
+  private final SwerveDrive m_swerveDrive;
+  private final Controller controller;
 
-  private SwerveDriveConfigurator swerveDriveConfigurator;
+  private final SwerveDriveConfigurator swerveDriveConfigurator;
 
   public static SwerveDriveSimulation swerveDriveSimulation;
 

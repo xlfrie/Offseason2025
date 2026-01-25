@@ -2,7 +2,7 @@ package frc.robot.subsystems.SwerveDrive;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Units;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -186,8 +186,8 @@ public class SwerveDriveConfigurator {
     BACK_RIGHT("Back Right", 3);
 
 
-    private String name;
-    private int index;
+    private final String name;
+    private final int index;
 
     SwerveModuleCornerPosition(String name, int id) {
       this.name = name;

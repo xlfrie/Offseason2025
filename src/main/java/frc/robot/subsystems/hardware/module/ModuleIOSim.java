@@ -6,7 +6,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Units;
 import edu.wpi.first.units.measure.*;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import frc.robot.Constants;
@@ -172,7 +172,7 @@ public class ModuleIOSim implements ModuleIO {
 
   @Override
   public void telemetryHook(SendableBuilder sendableBuilder) {
-    sendableBuilder.addDoubleProperty(getModuleName() + "-dError", () -> drivePID.getError(), null);
+    sendableBuilder.addDoubleProperty(getModuleName() + "-dError", drivePID::getError, null);
     sendableBuilder.addDoubleProperty(getModuleName() + "-dDesired_speed",
         () -> desiredState.speedMetersPerSecond, null);
     sendableBuilder.addDoubleProperty(getModuleName() + "-dReal_speed",
